@@ -3,16 +3,12 @@
 
 #include "../Image/Image.h"
 #include "../Image/Pixel.h"
+#include "../Utilities/Utilities.h"
 
 #include <fstream>
 #include <iostream>
 
 class FileManager {
-private:
-    static unsigned char convertToChar(const double& value) {
-        return static_cast<unsigned char>(value * 255);
-    }
-
 public:
     FileManager() = delete;
 
@@ -47,7 +43,9 @@ public:
         for (size_t y = 0; y < image.getHeight(); ++y) {
             for (size_t x = 0; x < image.getWidth(); ++x) {
                 const Pixel& pixel = image.getPixel(x, y);
-                file << convertToChar(pixel.getR()) << " " << convertToChar(pixel.getG()) << " " << convertToChar(pixel.getB()) << "  ";
+                file << Utilities::convertToChar(pixel.getR()) << " "
+                     << Utilities::convertToChar(pixel.getG()) << " "
+                     << Utilities::convertToChar(pixel.getB()) << "  ";
             }
             file << std::endl;
         }

@@ -28,7 +28,7 @@ public:
         return pixels[x][y];
     }
 
-    void setPixelColor(const size_t& x, const size_t& y, const double r, const double g, const double b) {
+    void setPixelColor(const size_t x, const size_t y, const double r, const double g, const double b) {
         pixels[x][y].setRGB(r, g, b);
     }
 
