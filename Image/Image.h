@@ -41,6 +41,6 @@ public:
         }
         return os;
     }
-}
+};
 
 #endif //HAYA_LUZ_IMAGE_H

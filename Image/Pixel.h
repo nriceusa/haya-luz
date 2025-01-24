@@ -1,7 +1,7 @@
 #ifndef HAYA_LUZ_PIXEL_H
 #define HAYA_LUZ_PIXEL_H
 
-#include "Utilities/Vector3.h"
+#include "../Utilities/Vector3.h"
 
 class Pixel {
 private:
@@ -45,6 +45,6 @@ public:
         os << std::to_string(pixel.getR()) << ' ' << std::to_string(pixel.getG()) << ' ' << std::to_string(pixel.getB());
         return os;
     }
-}
+};
 
 #endif //HAYA_LUZ_PIXEL_H
