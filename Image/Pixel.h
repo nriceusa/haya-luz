@@ -1,15 +1,15 @@
 #ifndef HAYA_LUZ_PIXEL_H
 #define HAYA_LUZ_PIXEL_H
 
-#include "../Utilities/Vector3.h"
+#include "Color.h"
 
 class Pixel {
 private:
-    Vector3 color;
+    Color color;
 
 public:
-    Pixel() : color(Vector3(0, 0, 0)) {}
-    Pixel(const Vector3& color) : color(color) {}
+    Pixel() : color(Color(0, 0, 0)) {}
+    Pixel(const Color& color) : color(color) {}
     
     double getR() const {
         return color.getR();
@@ -23,19 +23,19 @@ public:
         return color.getB();
     }
 
-    void setR(double newR) {
+    void setR(const double newR) {
         color.setR(newR);
     }
 
-    void setG(double newG) {
+    void setG(const double newG) {
         color.setG(newG);
     }
 
-    void setB(double newB) {
+    void setB(const double newB) {
         color.setB(newB);
     }
 
-    void setRGB(double newR, double newG, double newB) {
+    void setRGB(const double newR, const double newG, const double newB) {
         color.setR(newR);
         color.setG(newG);
         color.setB(newB);

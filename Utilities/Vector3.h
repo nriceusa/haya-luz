@@ -13,6 +13,7 @@ private:
     double z;
 
 public:
+    Vector3() : x(0), y(0), z(0) {}
     Vector3(const double x, const double y, const double z) : x(x), y(y), z(z) {}
 
     double getX() const {
@@ -27,15 +28,15 @@ public:
         return z;
     }
 
-    void setX(double newX) {
+    void setX(const double newX) {
         Vector3::x = newX;
     }
 
-    void setY(double newY) {
+    void setY(const double newY) {
         Vector3::y = newY;
     }
 
-    void setZ(double newZ) {
+    void setZ(const double newZ) {
         Vector3::z = newZ;
     }
 
@@ -51,15 +52,15 @@ public:
         return getZ();
     }
 
-    void setR(double newR) {
+    void setR(const double newR) {
         setX(newR);
     }
 
-    void setG(double newG) {
+    void setG(const double newG) {
         setY(newG);
     }
 
-    void setB(double newB) {
+    void setB(const double newB) {
         setZ(newB);
     }
 
@@ -128,12 +129,7 @@ public:
     }
 
     friend Vector3 operator/(const Vector3& vector, const double dividend) {
-        return 1/dividend * vector;
-    }
-
-    friend std::ostream &operator<<(std::ostream &os, const Vector3 &vector3) {
-        os << vector3.x << " " << vector3.y << " " << vector3.z;
-        return os;
+        return 1 / dividend * vector;
     }
 
     static double dot(const Vector3& vectorLeft, const Vector3& vectorRight) {
@@ -150,6 +146,11 @@ public:
 
     static Vector3 normalize(const Vector3& vector) {
         return vector / vector.getLength();
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Vector3& vector) {
+        os << vector.getX() << " " << vector.getY() << " " << vector.getZ();
+        return os;
     }
 };
 

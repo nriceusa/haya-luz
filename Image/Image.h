@@ -24,11 +24,11 @@ public:
         return pixels[0].size();
     }
 
-    const Pixel& getPixel(const size_t& x, const size_t& y) const {
+    const Pixel& getPixel(const size_t x, const size_t y) const {
         return pixels[x][y];
     }
 
-    void setPixelColor(const size_t x, const size_t y, const double r, const double g, const double b) {
+    void setPixelRGB(const size_t x, const size_t y, const double r, const double g, const double b) {
         pixels[x][y].setRGB(r, g, b);
     }
 

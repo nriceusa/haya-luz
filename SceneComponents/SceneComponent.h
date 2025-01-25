@@ -5,9 +5,9 @@
 
 class SceneComponent {
 private:
-    const Vector3 location;
-    const Vector3 rotation;
-    const Vector3 scale;
+    Vector3 location;
+    Vector3 rotation;
+    Vector3 scale;
 
 protected:
     SceneComponent() : location(0, 0, 0), rotation(0, 0, 0), scale(1, 1, 1) {}
@@ -34,28 +34,16 @@ public:
         return scale;
     }
 
-    double getLocationX() const {
-        return location.getX();
+    void setLocation(const Vector3& newLocation) {
+        location = newLocation;
     }
 
-    double getLocationY() const {
-        return location.getY();
+    void setRotation(const Vector3& newRotation) {
+        rotation = newRotation;
     }
 
-    double getLocationZ() const {
-        return location.getZ();
-    }
-
-    double getRotationX() const {
-        return rotation.getX();
-    }
-
-    double getRotationY() const {
-        return rotation.getY();
-    }
-
-    double getRotationZ() const {
-        return rotation.getZ();
+    void setScale(const Vector3& newScale) {
+        scale = newScale;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const SceneComponent &sceneComponent) {

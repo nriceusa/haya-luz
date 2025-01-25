@@ -19,7 +19,7 @@ public:
         return direction;
     }
 
-    Vector3 at(double position) const {
+    Vector3 at(const double position) const {
         return origin + (position * direction);
     }
 };

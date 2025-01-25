@@ -5,15 +5,15 @@
 
 class Sky: public SceneComponent {
 private:
-    Vector3 color;
+    Vector3 intensity;
 
 public:
-    Sky() : color(0, 0, 0) {}
+    Sky() : intensity(0, 0, 0) {}
 
-    Sky(Vector3& color) : color(color) {}
+    Sky(Vector3& intensity) : intensity(intensity) {}
 
-    const Vector3& getColor() const {
-        return color;
+    const Vector3& getIntensity() const {
+        return intensity;
     }
 };
 

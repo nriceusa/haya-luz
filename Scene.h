@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "SceneComponents/Camera.h"
-#include "SceneComponents/Light.h"
+#include "SceneComponents//Geometry/Geometry.h"
+#include "SceneComponents/Lights/Light.h"
 #include "SceneComponents/Sky.h"
 
 class Scene {

@@ -11,7 +11,14 @@ private:
 protected:
     Light() : intensity(1, 1, 1) {}
 
-    Light(const Vector3& intensity) : intensity(intensity) {}
+    Light(const Vector3& intensity, const Vector3& location) :
+        intensity(intensity), SceneComponent(location) {}
+
+    Light(const Vector3& intensity, const Vector3& location, const Vector3& rotation) :
+        intensity(intensity), SceneComponent(location, rotation) {}
+
+    Light(const Vector3& intensity, const Vector3& location, const Vector3& rotation, const Vector3& scale) :
+        intensity(intensity), SceneComponent(location, rotation, scale) {}
 
 public:
     const Vector3& getIntensity() const {

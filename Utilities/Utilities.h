@@ -11,7 +11,7 @@ public:
         return valInDegrees * (M_PI / 180);
     }
 
-    static unsigned char convertToChar(const double& value) {
+    static unsigned char convertToChar(const double value) {
         return static_cast<unsigned char>(value * 255);
     }
 };

@@ -12,7 +12,7 @@ public:
     Camera() : fieldOfView(Utilities::degreesToRadians(90)) {}
 
     Camera(const double fovInDegrees, const Vector3 origin, const Vector3 target) :
-        fieldOfView(Utilities::degreesToRadians(fovInDegrees)), SceneComponent(origin, target) {}
+        SceneComponent(origin, target), fieldOfView(Utilities::degreesToRadians(fovInDegrees)) {}
 
     double getFieldOfView() const {
         return fieldOfView;

@@ -3,14 +3,52 @@
 
 #include "../Image/Image.h"
 #include "../Image/Pixel.h"
+#include "../Scene.h"
 #include "../Utilities/Utilities.h"
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 class FileManager {
+private:
+    static Vector3 readVector3(std::istringstream& lineStream) {
+        double x, y, z;
+        lineStream >> x >> y >> z;
+        return Vector3(x, y, z);
+    }
+
 public:
     FileManager() = delete;
+
+    static Scene& readSceneFromFile(std::ifstream& file, Scene& scene) {
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream lineStream(line);
+            std::string type;
+            lineStream >> type;
+
+            if (type == "SKY") {
+                
+            } else if (type == "CAMERA") {
+                
+            } else if (type == "DIRECTIONAL_LIGHT") {
+                
+            } else if (type == "POINT_LIGHT") {
+
+            } else if (type == "MATERIAL") {
+                
+            } else if (type == "SPHERE") {
+                
+            } else if (type == "TRIANGLE") {
+                
+            } else {
+                std::cerr << "Error: Unknown type from input file: " << type << std::endl;
+            }
+        }
+
+        return scene;
+    }
 
     static std::ofstream& openFile(const std::string& fileName) {
         static std::ofstream file;
