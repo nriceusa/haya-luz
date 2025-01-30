@@ -12,6 +12,12 @@
 
 class FileManager {
 private:
+    static double readDouble(std::istringstream& lineStream) {
+        double value;
+        lineStream >> value;
+        return value;
+    }
+
     static Vector3 readVector3(std::istringstream& lineStream) {
         double x, y, z;
         lineStream >> x >> y >> z;
@@ -29,9 +35,15 @@ public:
             lineStream >> type;
 
             if (type == "SKY") {
+                Vector3 color = readVector3(lineStream);
+                scene.setSky(Sky(color));
                 
             } else if (type == "CAMERA") {
-                
+                Vector3 origin = readVector3(lineStream);
+                Vector3 target = readVector3(lineStream);
+                double fieldOfView = readDouble(lineStream);
+
+                scene.addCamera(Camera(fieldOfView, origin, target));
             } else if (type == "DIRECTIONAL_LIGHT") {
                 
             } else if (type == "POINT_LIGHT") {
@@ -56,8 +68,8 @@ public:
         return file;
     }
 
-    static std::ofstream& openFile() {
-        std::cout << "Would you like to enter a file name? (y/n): ";
+    static std::ofstream& openOutputFile() {
+        std::cout << "Would you like to enter a name for the output file? (y/n): ";
         char response = std::cin.get();
         
         if (response == 'y' || response == 'Y') {
@@ -78,8 +90,8 @@ public:
         file << "255" << std::endl;  // Maximum color value
 
         // Convert pixel values to char and write to file
-        for (size_t y = 0; y < image.getHeight(); ++y) {
-            for (size_t x = 0; x < image.getWidth(); ++x) {
+        for (uint y = 0; y < image.getHeight(); ++y) {
+            for (uint x = 0; x < image.getWidth(); ++x) {
                 const Pixel& pixel = image.getPixel(x, y);
                 file << Utilities::convertToChar(pixel.getR()) << " "
                      << Utilities::convertToChar(pixel.getG()) << " "

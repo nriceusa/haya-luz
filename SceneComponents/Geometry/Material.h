@@ -1,7 +1,7 @@
 #ifndef HAYA_LUZ_MATERIAL_H
 #define HAYA_LUZ_MATERIAL_H
 
-#include "../Utilities/Vector3.h"
+#include "../../Utilities/Vector3.h"
 
 class Material {
 private:

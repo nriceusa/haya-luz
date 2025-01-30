@@ -14,27 +14,27 @@ private:
 
 public:
     Image() : pixels(DEFAULT_WIDTH, std::vector<Pixel>(DEFAULT_HEIGHT)) {}
-    Image(const size_t width, const size_t height) : pixels(width, std::vector<Pixel>(height)) {}
+    Image(const uint width, const uint height) : pixels(width, std::vector<Pixel>(height)) {}
 
-    size_t getWidth() const {
+    uint getWidth() const {
         return pixels.size();
     }
 
-    size_t getHeight() const {
+    uint getHeight() const {
         return pixels[0].size();
     }
 
-    const Pixel& getPixel(const size_t x, const size_t y) const {
+    const Pixel& getPixel(const uint x, const uint y) const {
         return pixels[x][y];
     }
 
-    void setPixelRGB(const size_t x, const size_t y, const double r, const double g, const double b) {
+    void setPixelRGB(const uint x, const uint y, const double r, const double g, const double b) {
         pixels[x][y].setRGB(r, g, b);
     }
 
     friend std::ostream &operator<<(std::ostream& os, const Image& image) {
-        for (size_t y = 0; y < image.getHeight(); ++y) {
-            for (size_t x = 0; x < image.getWidth(); ++x) {
+        for (uint y = 0; y < image.getHeight(); ++y) {
+            for (uint x = 0; x < image.getWidth(); ++x) {
                 os << image.getPixel(x, y) << "  ";
             }
             os << std::endl;

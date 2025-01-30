@@ -19,10 +19,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ofstream& outputFile = FileManager::openFile();
+    std::cout << scene << std::endl;
 
-    const size_t image_width = 512;  // TODO: Allow user to specify image width and height.
-    const size_t image_height = 512;
+    std::ofstream& outputFile = FileManager::openOutputFile();
+
+    const uint image_width = 512;  // TODO: Allow user to specify image width and height.
+    const uint image_height = 512;
     Image image(image_width, image_height);
 
     FileManager::saveImageToFile(image, outputFile);

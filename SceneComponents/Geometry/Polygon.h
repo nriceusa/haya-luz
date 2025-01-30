@@ -23,7 +23,7 @@ public:
         setLocation(location);
     }
 
-    const Vector3 &getPoint(size_t pointIndex) const {
+    const Vector3 &getPoint(uint pointIndex) const {
         return points[pointIndex];
     }
 

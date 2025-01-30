@@ -2,7 +2,7 @@
 #define HAYA_LUZ_LIGHT_H
 
 #include "../SceneComponent.h"
-#include "../Utilities/Vector3.h"
+#include "../../Utilities/Vector3.h"
 
 class Light: public SceneComponent {
 private:
