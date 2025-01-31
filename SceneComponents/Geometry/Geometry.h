@@ -9,8 +9,6 @@ private:
     Material& material;
 
 protected:
-    Geometry() = default;
-
     Geometry(Material& material, const Vector3& location) :
         SceneComponent(location), material(material) {}
 

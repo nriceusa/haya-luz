@@ -8,7 +8,7 @@ private:
     double radius;
 
 public:
-    Sphere() : radius(1.0) {}
+    Sphere(Material& material, const Vector3& center) : Geometry(material, center), radius(1) {}
 
     Sphere(Material& material, const Vector3& center, double radius) : Geometry(material, center), radius(radius) {}
 
