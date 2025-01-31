@@ -17,6 +17,13 @@ public:
     double getFieldOfView() const {
         return fieldOfView;
     }
+
+    void print(std::ostream& os) const override {
+        os << "Camera:" << std::endl;
+        os << "origin: " << this->getLocation() << std::endl;
+        os << "target: " << this->getRotation() << std::endl;
+        os << "field of view: " << Utilities::radiansToDegrees(this->getFieldOfView()) << std::endl;
+    }
 };
 
 #endif //HAYA_LUZ_CAMERA_H

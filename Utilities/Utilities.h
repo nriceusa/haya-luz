@@ -11,6 +11,10 @@ public:
         return valInDegrees * (M_PI / 180);
     }
 
+    static double radiansToDegrees(const double valInRadians) {
+        return valInRadians * (180 / M_PI);
+    }
+
     static unsigned char convertToChar(const double value) {
         return static_cast<unsigned char>(value * 255);
     }

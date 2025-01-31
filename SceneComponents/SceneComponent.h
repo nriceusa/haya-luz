@@ -21,6 +21,8 @@ protected:
     SceneComponent(const Vector3& location, const Vector3& rotation, const Vector3& scale) :
         location(location), rotation(rotation), scale(scale) {}
 
+    virtual ~SceneComponent() = default;
+
 public:
     const Vector3& getLocation() const {
         return location;
@@ -46,10 +48,10 @@ public:
         scale = newScale;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const SceneComponent &sceneComponent) {
-        os << "location: " << sceneComponent.getLocation() << std::endl
-           << "rotation: " << sceneComponent.getRotation() << std::endl
-           << "scale: " << sceneComponent.getScale() << std::endl;
+    virtual void print(std::ostream& os) const = 0;
+
+    friend std::ostream &operator<<(std::ostream& os, const SceneComponent& sceneComponent) {
+        sceneComponent.print(os);
         return os;
     }
 };

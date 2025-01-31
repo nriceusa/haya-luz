@@ -5,15 +5,29 @@
 
 class Sky: public SceneComponent {
 private:
+    double intensityScalar;
     Vector3 intensity;
 
 public:
-    Sky() : intensity(0, 0, 0) {}
+    Sky() : intensityScalar(1), intensity(0, 0, 0) {}
 
-    Sky(Vector3& intensity) : intensity(intensity) {}
+    Sky(const Vector3& intensity) : intensityScalar(1), intensity(intensity) {}
+
+    Sky(const double intensityScalar, const Vector3& intensity) :
+        intensityScalar(intensityScalar), intensity(intensity) {}
+
+    const double getIntensityScalar() const {
+        return intensityScalar;
+    }
 
     const Vector3& getIntensity() const {
         return intensity;
+    }
+
+    void print(std::ostream& os) const override {
+        os << "Sky:" << std::endl;
+        os << "intensity scalar: " << getIntensityScalar() << std::endl;
+        os << "intensity: " << getIntensity() << std::endl;
     }
 };
 

@@ -4,7 +4,14 @@
 #include "../Image/Image.h"
 #include "../Image/Pixel.h"
 #include "../Scene.h"
-#include "../Utilities/Utilities.h"
+#include "../SceneComponents/Camera.h"
+#include "../SceneComponents/Geometry/Material.h"
+#include "../SceneComponents/Geometry/Polygon.h"
+#include "../SceneComponents/Geometry/Sphere.h"
+#include "../SceneComponents/Geometry/Triangle.h"
+#include "../SceneComponents/Lights/DirectionalLight.h"
+#include "../SceneComponents/Sky.h"
+#include "Utilities.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,6 +19,12 @@
 
 class FileManager {
 private:
+    static uint readUint(std::istringstream& lineStream) {
+        uint value;
+        lineStream >> value;
+        return value;
+    }
+
     static double readDouble(std::istringstream& lineStream) {
         double value;
         lineStream >> value;
@@ -35,25 +48,77 @@ public:
             lineStream >> type;
 
             if (type == "SKY") {
-                Vector3 color = readVector3(lineStream);
-                scene.setSky(Sky(color));
-                
+                const Vector3 intensity = readVector3(lineStream);
+                const double intensityScalar = readDouble(lineStream);
+
+                scene.setSky(Sky(intensityScalar, intensity));
+
             } else if (type == "CAMERA") {
-                Vector3 origin = readVector3(lineStream);
-                Vector3 target = readVector3(lineStream);
-                double fieldOfView = readDouble(lineStream);
+                const Vector3 origin = readVector3(lineStream);
+                const Vector3 target = readVector3(lineStream);
+                const double fieldOfView = readDouble(lineStream);
 
                 scene.addCamera(Camera(fieldOfView, origin, target));
+
             } else if (type == "DIRECTIONAL_LIGHT") {
+                const Vector3 direction = readVector3(lineStream);
+                const Vector3 intensity = readVector3(lineStream);
+                const double intensityScalar = readDouble(lineStream);
+
+                scene.addLight(DirectionalLight(intensityScalar, intensity, direction));
                 
             } else if (type == "POINT_LIGHT") {
+                const Vector3 location = readVector3(lineStream);
+                const Vector3 intensity = readVector3(lineStream);
+                const double intensityScalar = readDouble(lineStream);
+
+                scene.addLight(PointLight(intensityScalar, intensity, location));
 
             } else if (type == "MATERIAL") {
-                
+                const uint id = readUint(lineStream);
+
+                const Vector3 diffuseIntensity = readVector3(lineStream);
+                const Vector3 specularIntensity = readVector3(lineStream);
+                const Vector3 emissionIntensity = readVector3(lineStream);
+                const double diffuse = readDouble(lineStream);
+                const double specular = readDouble(lineStream);
+                const double glossiness = readDouble(lineStream);
+                const double ambient = readDouble(lineStream);
+
+                Material material(diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
+                                  specular, glossiness, ambient);
+                scene.addMaterial(material);
+
             } else if (type == "SPHERE") {
+                const uint materialId = readUint(lineStream);
+                const Vector3 center = readVector3(lineStream);
+                const double radius = readDouble(lineStream);
+
+                Sphere sphere(scene.getMaterial(materialId), center, radius);
+                scene.addGeometry(sphere);
                 
             } else if (type == "TRIANGLE") {
-                
+                const uint materialId = readUint(lineStream);
+                const Vector3 point1 = readVector3(lineStream);
+                const Vector3 point2 = readVector3(lineStream);
+                const Vector3 point3 = readVector3(lineStream);
+
+                Triangle triangle(scene.getMaterial(materialId), point1, point2, point3);
+                scene.addGeometry(triangle);
+
+            } else if (type == "POLYGON") {
+                const uint materialId = readUint(lineStream);
+                const uint numVertices = readUint(lineStream);
+                std::vector<Vector3> points;
+                for (uint i = 0; i < numVertices; ++i) {
+                    points.push_back(readVector3(lineStream));
+                }
+
+                Polygon polygon(scene.getMaterial(materialId), points);
+                scene.addGeometry(polygon);
+
+            } else if (type == "") {
+                // Do nothing
             } else {
                 std::cerr << "Error: Unknown type from input file: " << type << std::endl;
             }

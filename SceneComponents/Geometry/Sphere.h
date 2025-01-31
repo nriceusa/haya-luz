@@ -10,7 +10,7 @@ private:
 public:
     Sphere() : radius(1.0) {}
 
-    Sphere(const Material& material, const Vector3& center, double radius) : Geometry(material, center), radius(radius) {}
+    Sphere(Material& material, const Vector3& center, double radius) : Geometry(material, center), radius(radius) {}
 
     double getRadius() const {
         return radius;
@@ -18,6 +18,13 @@ public:
 
     void setRadius(const double newRadius) {
         radius = newRadius;
+    }
+
+    void print(std::ostream& os) const override {
+        os << "Sphere:" << std::endl;
+        os << "center: " << this->getLocation() << std::endl;
+        os << "radius: " << radius << std::endl;
+        os << "material: " << this->getMaterial() << std::endl;
     }
 };
 
