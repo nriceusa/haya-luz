@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Image/Image.h"
+#include "Renderer/RayTracer.h"
 #include "Scene.h"
 #include "Utilities/FileManager.h"
 
@@ -26,6 +27,8 @@ int main(int argc, char* argv[]) {
     const uint image_width = 512;  // TODO: Allow user to specify image width and height.
     const uint image_height = 512;
     Image image(image_width, image_height);
+
+    RayTracer rayTracer();
 
     FileManager::saveImageToFile(image, outputFile);
 

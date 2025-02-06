@@ -34,8 +34,12 @@ public:
         return points;
     }
 
-    const Vector3 &getNormal() const {
+    const Vector3& getNormal() const {
         return normal;
+    }
+
+    const Vector3 getNormalAt(const Vector3 &point) const override {
+        return getNormal();
     }
 
     void print(std::ostream &os) const override {

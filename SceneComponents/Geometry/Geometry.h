@@ -20,6 +20,8 @@ public:
         return material;
     }
 
+    virtual const Vector3 getNormalAt(const Vector3& point) const = 0;
+
     virtual void print(std::ostream& os) const override = 0;
 };
 

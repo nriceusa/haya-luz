@@ -51,6 +51,10 @@ public:
         return normal;
     }
 
+    const Vector3 getNormalAt(const Vector3 &point) const override {
+        return getNormal();
+    }
+
     void print(std::ostream& os) const override {
         os << "Triangle:" << std::endl;
         os << "point1: " << point1 << std::endl;

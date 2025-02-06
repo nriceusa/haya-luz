@@ -12,12 +12,20 @@ public:
 
     Sphere(Material& material, const Vector3& center, double radius) : Geometry(material, center), radius(radius) {}
 
-    double getRadius() const {
+    const Vector3& getCenter() const {
+        return this->getLocation();
+    }
+
+    const double getRadius() const {
         return radius;
     }
 
     void setRadius(const double newRadius) {
         radius = newRadius;
+    }
+
+    const Vector3 getNormalAt(const Vector3& point) const override {
+        return (point - this->getLocation()) / radius;
     }
 
     void print(std::ostream& os) const override {
