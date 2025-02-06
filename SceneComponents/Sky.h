@@ -24,6 +24,10 @@ public:
         return intensity;
     }
 
+    const Vector3 getAmbientLight() const {
+        return intensity * intensityScalar;
+    }
+
     void print(std::ostream& os) const override {
         os << "Sky:" << std::endl;
         os << "intensity scalar: " << getIntensityScalar() << std::endl;

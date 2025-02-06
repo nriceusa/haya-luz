@@ -12,13 +12,15 @@ private:
     double maxClippingDistance;
 
 public:
+    RayTracer() : glossyBounces(4), minClippingDistance(0), maxClippingDistance(std::numeric_limits<double>::max()) {}
+
     RayTracer(const uint glossyBounces) :
         glossyBounces(glossyBounces), minClippingDistance(0), maxClippingDistance(std::numeric_limits<double>::max()) {}
 
     RayTracer(const uint glossyBounces, double minClippingDistance, double maxClippingDistance) :
         glossyBounces(glossyBounces), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
 
-    Image render(const Scene& scene, Image& image) {
+    void render(const Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
         Vector3 rayDestination = Vector3::normalize(camera.getTarget() - camera.getOrigin());
 
@@ -40,7 +42,9 @@ public:
                 double lowestDistance = maxClippingDistance;
 
                 // Check for intersections with polygons
-                for (const Geometry& geometry : scene.getGeometries()) {
+                for (const Geometry* geo : scene.getGeometries()) {
+                    const Geometry& geometry = *geo;
+
                     const double distance = ray.hit(geometry);
                     if (distance < lowestDistance && distance > minClippingDistance) {
                         lowestDistance = distance;
@@ -48,15 +52,12 @@ public:
                         const Vector3 normal = geometry.getNormalAt(intersect);
 
                         // Only accounts for one light
-                        Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal,
-                                                                       scene.getAmbientLight(), geometry.getMaterial());
-                        image.setPixelRGB(x, y, surfaceColor.getX(), surfaceColor.getY(), surfaceColor.getZ());
+                        Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, geometry.getMaterial());
+                        image.setPixelRGB(x, y, surfaceColor.getR(), surfaceColor.getG(), surfaceColor.getB());
                     }
                 }
             }
         }
-
-        return image;
     };
 };
 

@@ -28,7 +28,8 @@ int main(int argc, char* argv[]) {
     const uint image_height = 512;
     Image image(image_width, image_height);
 
-    RayTracer rayTracer();
+    RayTracer rayTracer;
+    rayTracer.render(scene, image);
 
     FileManager::saveImageToFile(image, outputFile);
 

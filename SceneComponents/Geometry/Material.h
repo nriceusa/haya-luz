@@ -10,7 +10,7 @@ private:
     Vector3 emissionIntensity;
     double diffuse;
     double specular;
-    double glossiness;
+    double specularRoughness;
     double emissivity;
     double transmission;
     double refractionIndex;
@@ -22,32 +22,32 @@ public:
         emissionIntensity(Vector3(0.1, 0.1, 0.1)),
         diffuse(0.5),
         specular(0.5),
-        glossiness(0.5),
+        specularRoughness(0.5),
         emissivity(0.1),
         transmission(0),
         refractionIndex(1) {}
     
     Material(const Vector3& diffuseIntensity, const Vector3& specularIntensity, const Vector3& emissionIntensity,
-             const double diffuse, const double specular, const double glossiness, const double emissivity) :
+             const double diffuse, const double specular, const double specularRoughness, const double emissivity) :
         diffuseIntensity(diffuseIntensity),
         specularIntensity(specularIntensity),
         emissionIntensity(Vector3(0, 0, 0)),
         diffuse(diffuse),
         specular(specular),
-        glossiness(glossiness),
+        specularRoughness(specularRoughness),
         emissivity(emissivity),
         transmission(0),
         refractionIndex(1) {}
     
     Material(const Vector3& diffuseIntensity, const Vector3& specularIntensity, const Vector3& emissionIntensity,
-             const double diffuse, const double specular, const double glossiness, const double emissivity,
+             const double diffuse, const double specular, const double specularRoughness, const double emissivity,
              const double transmission, const double refractionIndex) :
         diffuseIntensity(diffuseIntensity),
         specularIntensity(specularIntensity),
         emissionIntensity(emissionIntensity),
         diffuse(diffuse),
         specular(specular),
-        glossiness(glossiness),
+        specularRoughness(specularRoughness),
         emissivity(emissivity),
         transmission(transmission),
         refractionIndex(refractionIndex) {}
@@ -60,6 +60,10 @@ public:
         return specularIntensity;
     }
 
+    const Vector3& getEmissionIntensity() const {
+        return emissionIntensity;
+    }
+
     double getDiffuse() const {
         return diffuse;
     }
@@ -68,11 +72,11 @@ public:
         return specular;
     }
 
-    double getGlossiness() const {
-        return glossiness;
+    double getSpecularRoughness() const {
+        return specularRoughness;
     }
 
-    double getAmbient() const {
+    double getEmissivity() const {
         return emissivity;
     }
 
@@ -100,8 +104,8 @@ public:
         specular = newSpecular;
     }
 
-    void setGlossiness(const double newGlossiness) {
-        glossiness = newGlossiness;
+    void setSpecularRoughness(const double newSpecularRoughness) {
+        specularRoughness = newSpecularRoughness;
     }
 
     void setAmbient(const double newAmbient) {
@@ -120,10 +124,11 @@ public:
         os << "Material:" << std::endl
            << "    diffuseIntensity: " << material.getDiffuseIntensity() << std::endl
            << "    specularIntensity: " << material.getSpecularIntensity() << std::endl
+           << "    emissionIntensity: " << material.getEmissionIntensity() << std::endl
            << "    diffuse: " << material.getDiffuse() << std::endl
            << "    specular: " << material.getSpecular() << std::endl
-           << "    glossiness: " << material.getGlossiness() << std::endl
-           << "    ambient: " << material.getAmbient() << std::endl
+           << "    specularRoughness: " << material.getSpecularRoughness() << std::endl
+           << "    emissivity: " << material.getEmissivity() << std::endl
            << "    transmission: " << material.getTransmission() << std::endl
            << "    refractionIndex: " << material.getRefractionIndex() << std::endl;
         

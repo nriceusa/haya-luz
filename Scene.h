@@ -21,11 +21,11 @@ private:
     Camera* activeCamera;
     std::vector<Camera> cameras;
 
-    std::vector<const Light&> lights;
+    std::vector<const Light*> lights;
     std::vector<DirectionalLight> directionalLights;
     std::vector<PointLight> pointLights;
 
-    std::vector<const Geometry&> geometries;
+    std::vector<const Geometry*> geometries;
     std::vector<Polygon> polygons;
     std::vector<Sphere> spheres;
     std::vector<Triangle> triangles;
@@ -68,31 +68,31 @@ public:
     void addLight(const Light& light) {
         if (const DirectionalLight* directionalLight = dynamic_cast<const DirectionalLight*>(&light)) {
             directionalLights.push_back(*directionalLight);
-            lights.push_back(directionalLights.back());
+            lights.push_back(&directionalLights.back());
         } else if (const PointLight* pointLight = dynamic_cast<const PointLight*>(&light)) {
             pointLights.push_back(*pointLight);
-            lights.push_back(pointLights.back());
+            lights.push_back(&pointLights.back());
         }
     }
 
-    const std::vector<const Light&>& getLights() const {
+    const std::vector<const Light*>& getLights() const {
         return lights;
     }
 
     void addGeometry(Geometry& geometry) {
         if (Polygon* polygon = dynamic_cast<Polygon*>(&geometry)) {
             polygons.push_back(*polygon);
-            geometries.push_back(polygons.back());
+            geometries.push_back(&polygons.back());
         } else if (Sphere* sphere = dynamic_cast<Sphere*>(&geometry)) {
             spheres.push_back(*sphere);
-            geometries.push_back(spheres.back());
+            geometries.push_back(&spheres.back());
         } else if (Triangle* triangle = dynamic_cast<Triangle*>(&geometry)) {
             triangles.push_back(*triangle);
-            geometries.push_back(triangles.back());
+            geometries.push_back(&triangles.back());
         }
     }
 
-    const std::vector<const Geometry&>& getGeometries() const {
+    const std::vector<const Geometry*>& getGeometries() const {
         return geometries;
     }
 
