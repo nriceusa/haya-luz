@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     RayTracer rayTracer;
     rayTracer.render(scene, image);
 
-    FileManager::saveImageToFile(image, outputFile);
+    FileManager::saveImageAsPPM(image, outputFile);
 
     std::cout << "haya-luz exited successfully." << std::endl;
     return 0;

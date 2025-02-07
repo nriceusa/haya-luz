@@ -15,8 +15,8 @@ public:
         return valInRadians * (180 / M_PI);
     }
 
-    static unsigned char convertToChar(const double value) {
-        return static_cast<unsigned char>(value * 255);
+    static uint convertTo256(const double value) {
+        return static_cast<uint>(value * 255);
     }
 };
 

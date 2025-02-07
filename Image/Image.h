@@ -1,8 +1,8 @@
 #ifndef HAYA_LUZ_IMAGE_H
 #define HAYA_LUZ_IMAGE_H
 
-#define DEFAULT_WIDTH 100
-#define DEFAULT_HEIGHT 75
+#define DEFAULT_WIDTH 64
+#define DEFAULT_HEIGHT 36
 
 #include <vector>
 
@@ -32,7 +32,7 @@ public:
         pixels[x][y].setRGB(r, g, b);
     }
 
-    friend std::ostream &operator<<(std::ostream& os, const Image& image) {
+    friend std::ostream& operator<<(std::ostream& os, const Image& image) {
         for (uint y = 0; y < image.getHeight(); ++y) {
             for (uint x = 0; x < image.getWidth(); ++x) {
                 os << image.getPixel(x, y) << "  ";

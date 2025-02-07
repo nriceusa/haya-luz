@@ -41,11 +41,16 @@ public:
                 const Ray ray(camera.getOrigin(), rayDestination, scene);
                 double lowestDistance = maxClippingDistance;
 
+                // std::cout << "X: " << x << " Y: " << y << std::endl;
+
                 // Check for intersections with polygons
                 for (const Geometry* geo : scene.getGeometries()) {
                     const Geometry& geometry = *geo;
 
                     const double distance = ray.hit(geometry);
+
+                    // std::cout << "Distance: " << distance << std::endl;
+
                     if (distance < lowestDistance && distance > minClippingDistance) {
                         lowestDistance = distance;
                         const Vector3 intersect = ray.at(distance);
@@ -53,12 +58,15 @@ public:
 
                         // Only accounts for one light
                         Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, geometry.getMaterial());
+
+                        // std::cout << "Surface color: " << surfaceColor << std::endl;
+
                         image.setPixelRGB(x, y, surfaceColor.getR(), surfaceColor.getG(), surfaceColor.getB());
                     }
                 }
             }
         }
-    };
+    }
 };
 
 #endif //HAYA_LUZ_RAYTRACER_H

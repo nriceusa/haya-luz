@@ -82,11 +82,11 @@ public:
                 const Vector3 emissionIntensity = readVector3(lineStream);
                 const double diffuse = readDouble(lineStream);
                 const double specular = readDouble(lineStream);
-                const double glossiness = readDouble(lineStream);
-                const double ambient = readDouble(lineStream);
+                const double specularRoughness = readDouble(lineStream);
+                const double emissivity = readDouble(lineStream);
 
                 Material material(diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
-                                  specular, glossiness, ambient);
+                                  specular, specularRoughness, emissivity);
                 scene.addMaterial(material);
 
             } else if (type == "SPHERE") {
@@ -117,7 +117,7 @@ public:
                 Polygon polygon(scene.getMaterial(materialId), points);
                 scene.addGeometry(polygon);
 
-            } else if (type == "") {
+            } else if (type == "" || type == "#") {
                 // Do nothing
             } else {
                 std::cerr << "Error: Unknown type from input file: " << type << std::endl;
@@ -148,7 +148,7 @@ public:
         return openFile("test");
     }
 
-    static void saveImageToFile(const Image& image, std::ofstream& file) {
+    static void saveImageAsPPM(const Image& image, std::ofstream& file) {
         // Header
         file << "P3" << std::endl;  // ASCII file
         file << image.getWidth() << " " << image.getHeight() << std::endl;  // Number of columns and rows
@@ -158,14 +158,12 @@ public:
         for (uint y = 0; y < image.getHeight(); ++y) {
             for (uint x = 0; x < image.getWidth(); ++x) {
                 const Pixel& pixel = image.getPixel(x, y);
-                file << Utilities::convertToChar(pixel.getR()) << " "
-                     << Utilities::convertToChar(pixel.getG()) << " "
-                     << Utilities::convertToChar(pixel.getB()) << "  ";
+                file << Utilities::convertTo256(pixel.getR()) << " "
+                     << Utilities::convertTo256(pixel.getG()) << " "
+                     << Utilities::convertTo256(pixel.getB()) << "  ";
             }
             file << std::endl;
         }
-
-        file << image << std::endl;  // Pixel values
     }
 };
 
