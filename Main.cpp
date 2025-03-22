@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
 
     std::ofstream& outputFile = FileManager::openOutputFile();
 
-    const uint image_width = 512;  // TODO: Allow user to specify image width and height.
-    const uint image_height = 512;
+    const uint image_width = 128;  // TODO: Allow user to specify image width and height.
+    const uint image_height = 128;
     Image image(image_width, image_height);
 
     RayTracer rayTracer;

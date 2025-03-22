@@ -32,8 +32,56 @@ private:
 
     std::vector<Material> materials;
 
+    void rotateComponent(SceneComponent& component, const Vector3 translation, const Vector3& rotationAxis, const double angle) {
+        component.setLocation(Vector3::rotate(component.getLocation() + translation, rotationAxis, angle));
+        component.setRotation(Vector3::rotate(component.getRotation(), rotationAxis, angle));
+    }
+
+    void alignToActiveCamera() {
+        const Vector3 translation = -activeCamera->getLocation() + Vector3(0, 0, 1);
+
+        // Define the rotation
+        const Vector3 cameraRotation = Vector3::normalize(activeCamera->getRotation());
+        const Vector3 targetView(0, 0, 0);
+        const double angle = acos(Vector3::dot(cameraRotation, targetView));
+        Vector3 rotationAxis = Vector3::normalize(Vector3::cross(cameraRotation, targetView));
+
+        // Handle rotation edge case
+        if (rotationAxis.getLength() < 0.0001) {
+            rotationAxis = Vector3(0, 1, 0);
+        }
+        
+        transform(translation, rotationAxis, angle);
+    }
+
 public:
     Scene() = default;
+
+    void transform(const Vector3 translation, const Vector3 rotationAxis, const double angle) {
+        for (Camera& camera : cameras) {
+            rotateComponent(camera, translation, rotationAxis, angle);
+        }
+
+        for (DirectionalLight& light : directionalLights) {
+            rotateComponent(light, translation, rotationAxis, angle);
+        }
+
+        for (PointLight& light : pointLights) {
+            rotateComponent(light, translation, rotationAxis, angle);
+        }
+
+        for (Polygon& polygon : polygons) {
+            rotateComponent(polygon, translation, rotationAxis, angle);
+        }
+
+        for (Sphere& sphere : spheres) {
+            rotateComponent(sphere, translation, rotationAxis, angle);
+        }
+
+        for (Triangle& triangle : triangles) {
+            rotateComponent(triangle, translation, rotationAxis, angle);
+        }
+    }
 
     const Sky& getSky() const {
         return sky;
@@ -43,16 +91,17 @@ public:
         sky = newSky;
     }
 
+    const Camera& getCamera(const uint index) const {
+        return cameras[index];
+    }
+
     void addCamera(const Camera& camera) {
         cameras.push_back(camera);
 
         if (cameras.size() == 1) {
             activeCamera = &cameras[0];
+            alignToActiveCamera();
         }
-    }
-
-    const Camera& getCamera(const uint index) const {
-        return cameras[index];
     }
 
     const Camera& getActiveCamera() const {
@@ -62,6 +111,7 @@ public:
     void setActiveCamera(const uint index) {
         if (index < cameras.size()) {
             activeCamera = &cameras[index];
+            alignToActiveCamera();
         }
     }
 
@@ -96,16 +146,16 @@ public:
         return geometries;
     }
 
-    void addMaterial(Material& material) {
-        materials.push_back(material);
-    }
-
     Material& getMaterial(const uint index) {
         return materials[index];
     }
 
-    std::vector<Material>& getMaterials() {
+    const std::vector<Material>& getMaterials() const {
         return materials;
+    }
+
+    void addMaterial(Material& material) {
+        materials.push_back(material);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Scene& scene) {

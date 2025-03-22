@@ -12,7 +12,7 @@ public:
     Camera() : fieldOfView(Utilities::degreesToRadians(90)), SceneComponent(Vector3(0, 0, 0), Vector3(0, 0, -1)) {}
 
     Camera(const double fovInDegrees, const Vector3 origin, const Vector3 target) :
-        SceneComponent(origin, target), fieldOfView(Utilities::degreesToRadians(fovInDegrees)) {}
+        SceneComponent(origin, target - origin), fieldOfView(Utilities::degreesToRadians(fovInDegrees)) {}
 
     double getFieldOfView() const {
         return fieldOfView;
@@ -22,8 +22,8 @@ public:
         return getLocation();
     }
 
-    const Vector3& getTarget() const {
-        return getRotation();
+    const Vector3 getTarget() const {
+        return getRotation() + getLocation();
     }
 
     void print(std::ostream& os) const override {

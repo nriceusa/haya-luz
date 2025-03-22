@@ -82,34 +82,35 @@ public:
         }
     }
 
-    Vector3 computeSurface(const size_t numRecursions, const Vector3& intersect, const Vector3& normal,
-                           const Material& material) const {
+    const Vector3 computeSurface(const uint numRecursions, const Vector3& intersect, const Vector3& normal,
+                                 const Material& material) const {
         if (numRecursions <= 0) {
             return {0, 0, 0};
         }
 
-        const Light& light = *scene.getLights().at(0);
-        const Vector3 l = Vector3::normalize(light.getLocation() - intersect);
-        const Vector3 n = Vector3::normalize(normal);
+        const Light& light = *scene.getLights()[0];  // Only accounts for one light
+        const Vector3 vectorToLight = Vector3::normalize(light.getLocation() - intersect);
+        const Vector3 normalVector = Vector3::normalize(normal);
         const Vector3 v = Vector3::normalize(origin - intersect);
         const Vector3 d = Vector3::normalize(direction);
 
         // Compute shadows
         bool inShadow = false;
         const Vector3 shadowVector = Vector3::normalize(light.getLocation() - intersect);
-        const Ray shadowRay(intersect + (shadowVector * 0.001), light.getLocation(), scene);
+        const Ray shadowRay(intersect + (shadowVector * MIN_ERROR_DISTANCE), light.getLocation(), scene);
         for (const Geometry* geo : scene.getGeometries()) {
             const Geometry& geometry = *geo;
 
             const double t = shadowRay.hit(geometry);
             if (t > 0) {
                 inShadow = true;
+                break;
             }
         }
 
         // Compute reflections
-        const Vector3 reflectionDirection = d - (2 * n * (Vector3::dot(d, n)));
-        const Ray reflectionRay(intersect + (n * MIN_ERROR_DISTANCE), reflectionDirection, scene);
+        const Vector3 reflectionDirection = d - (2 * normalVector * (Vector3::dot(d, normalVector)));
+        const Ray reflectionRay(intersect + (normalVector * MIN_ERROR_DISTANCE), reflectionDirection, scene);
 
         const Vector3 ambientLight = scene.getSky().getAmbientLight();
         Vector3 reflectedColor = ambientLight;
@@ -128,17 +129,18 @@ public:
         const Vector3 ir = material.getSpecular() * reflectedColor;
 
         // Compute diffuse
-        double angleToLight = Vector3::dot(n, l);
+        double angleToLight = Vector3::dot(normalVector, vectorToLight);
         if (angleToLight < 0) {
             angleToLight = 0;
         }
         const Vector3 diffuse = material.getDiffuse() * light.getIntensity() * material.getDiffuseIntensity() * angleToLight;
+        // std::cout << "Diffuse: " << material << std::endl;
 
         // Compute ambience
         const Vector3 ambience = material.getEmissionIntensity() * material.getEmissivity() * ambientLight;
 
         // Compute specular highlight
-        const Vector3 r = 2 * n * Vector3::dot(n, l) - l;
+        const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;
         double angleToReflection = Vector3::dot(v, r);
         if (angleToReflection < 0) {
             angleToReflection = 0;
@@ -146,14 +148,20 @@ public:
         const Vector3 specular = material.getSpecular() * light.getIntensity() *
             material.getSpecularIntensity() * pow(angleToReflection, material.getSpecularRoughness());
 
+        // std::cout << "Ambience: " << ambience << std::endl;
+        // std::cout << "IR: " << ir << std::endl;
+        // std::cout << "In shadow: " << inShadow << std::endl;
+        // std::cout << "Specular: " << specular << std::endl;
+        // std::cout << "Diffuse: " << diffuse << std::endl << std::endl;
+
         // Sum lighting components
         Vector3 surfaceColor = ambience + ir;
         if (!inShadow) {
             surfaceColor += specular + diffuse;
         }
-        surfaceColor.setR(surfaceColor.getR() > 1 ? 1 : surfaceColor.getR());
-        surfaceColor.setG(surfaceColor.getG() > 1 ? 1 : surfaceColor.getG());
-        surfaceColor.setB(surfaceColor.getB() > 1 ? 1 : surfaceColor.getB());
+        surfaceColor.setR(surfaceColor.getR() > 1 ? 1 : surfaceColor.getR() < 0 ? 0 : surfaceColor.getR());
+        surfaceColor.setG(surfaceColor.getG() > 1 ? 1 : surfaceColor.getG() < 0 ? 0 : surfaceColor.getG());
+        surfaceColor.setB(surfaceColor.getB() > 1 ? 1 : surfaceColor.getB() < 0 ? 0 : surfaceColor.getB());
         return surfaceColor;
     }
 };

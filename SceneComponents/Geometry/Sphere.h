@@ -32,7 +32,7 @@ public:
         os << "Sphere:" << std::endl;
         os << "center: " << this->getLocation() << std::endl;
         os << "radius: " << radius << std::endl;
-        os << "material: " << this->getMaterial() << std::endl;
+        os << this->getMaterial() << std::endl;
     }
 };
 

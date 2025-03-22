@@ -2,6 +2,7 @@
 #define HAYA_LUZ_PIXEL_H
 
 #include "Color.h"
+#include "../Utilities/Vector3.h"
 
 class Pixel {
 private:
@@ -39,6 +40,12 @@ public:
         color.setR(newR);
         color.setG(newG);
         color.setB(newB);
+    }
+
+    void setRGB(const Vector3& newRGB) {
+        color.setR(newRGB.getR());
+        color.setG(newRGB.getG());
+        color.setB(newRGB.getB());
     }
 
     friend std::ostream &operator<<(std::ostream& os, const Pixel& pixel) {

@@ -89,6 +89,8 @@ public:
                                   specular, specularRoughness, emissivity);
                 scene.addMaterial(material);
 
+                std::cout << ">>Material: " << material << std::endl;
+
             } else if (type == "SPHERE") {
                 const uint materialId = readUint(lineStream);
                 const Vector3 center = readVector3(lineStream);
@@ -158,9 +160,9 @@ public:
         for (uint y = 0; y < image.getHeight(); ++y) {
             for (uint x = 0; x < image.getWidth(); ++x) {
                 const Pixel& pixel = image.getPixel(x, y);
-                file << Utilities::convertTo256(pixel.getR()) << " "
-                     << Utilities::convertTo256(pixel.getG()) << " "
-                     << Utilities::convertTo256(pixel.getB()) << "  ";
+                file << Utilities::doubleTo256(pixel.getR()) << " "
+                     << Utilities::doubleTo256(pixel.getG()) << " "
+                     << Utilities::doubleTo256(pixel.getB()) << "  ";
             }
             file << std::endl;
         }

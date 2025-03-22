@@ -86,6 +86,13 @@ public:
         return *this;
     }
 
+    Vector3& operator*=(const Vector3& vector) {
+        x *= vector.getX();
+        y *= vector.getY();
+        z *= vector.getZ();
+        return *this;
+    }
+
     Vector3& operator/=(const double dividend) {
         return *this *= 1/dividend;
     }
@@ -146,6 +153,10 @@ public:
 
     static Vector3 normalize(const Vector3& vector) {
         return vector / vector.getLength();
+    }
+
+    static Vector3 rotate(const Vector3& vec, const Vector3& rotationAxis, double angle) {
+        return vec * cos(angle) + cross(rotationAxis, vec) * sin(angle) + rotationAxis * dot(rotationAxis, vec) * (1 - cos(angle));        
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector3& vector) {

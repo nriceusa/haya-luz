@@ -20,48 +20,43 @@ public:
     RayTracer(const uint glossyBounces, double minClippingDistance, double maxClippingDistance) :
         glossyBounces(glossyBounces), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
 
-    void render(const Scene& scene, Image& image) const {
+    void render(Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
-        Vector3 rayDestination = Vector3::normalize(camera.getTarget() - camera.getOrigin());
+        Vector3 rayVector = Vector3::normalize(camera.getRotation());
 
-        const double xOffset = rayDestination.getZ() * tan(camera.getFieldOfView() / 2);
+        const double xOffset = rayVector.getZ() * tan(camera.getFieldOfView() / 2);
         const double yOffset = -xOffset * (static_cast<double>(image.getHeight()) / static_cast<double>(image.getWidth()));
         const double pixelWidth = (2 * -xOffset) / static_cast<double>(image.getWidth());
-        const double initialX = rayDestination.getX() + xOffset;
-        const double initialY = rayDestination.getY() + yOffset;
+        const double initialX = rayVector.getX() + xOffset;
+        const double initialY = rayVector.getY() + yOffset;
 
-        rayDestination.setX(initialX);
-        for (size_t x = 0; x < image.getWidth(); ++x) {
-            rayDestination.setX(rayDestination.getX() + pixelWidth);
+        rayVector.setX(initialX);
+        for (uint x = 0; x < image.getWidth(); ++x) {
+            rayVector.setX(rayVector.getX() + pixelWidth);
 
-            rayDestination.setY(initialY);
-            for (size_t y = 0; y < image.getHeight(); ++y) {
-                rayDestination.setY(rayDestination.getY() - pixelWidth);
+            rayVector.setY(initialY);
+            for (uint y = 0; y < image.getHeight(); ++y) {
+                rayVector.setY(rayVector.getY() - pixelWidth);
+                const Ray ray(camera.getOrigin(), rayVector, scene);
 
-                const Ray ray(camera.getOrigin(), rayDestination, scene);
+                // Set background color
+                image.setPixelRGB(x, y, scene.getSky().getAmbientLight().getR(), scene.getSky().getAmbientLight().getG(),
+                    scene.getSky().getAmbientLight().getB());
+
+                // Check for intersections with geometry
                 double lowestDistance = maxClippingDistance;
-
-                // std::cout << "X: " << x << " Y: " << y << std::endl;
-
-                // Check for intersections with polygons
                 for (const Geometry* geo : scene.getGeometries()) {
                     const Geometry& geometry = *geo;
 
                     const double distance = ray.hit(geometry);
-
-                    // std::cout << "Distance: " << distance << std::endl;
 
                     if (distance < lowestDistance && distance > minClippingDistance) {
                         lowestDistance = distance;
                         const Vector3 intersect = ray.at(distance);
                         const Vector3 normal = geometry.getNormalAt(intersect);
 
-                        // Only accounts for one light
-                        Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, geometry.getMaterial());
-
-                        // std::cout << "Surface color: " << surfaceColor << std::endl;
-
-                        image.setPixelRGB(x, y, surfaceColor.getR(), surfaceColor.getG(), surfaceColor.getB());
+                        const Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, geometry.getMaterial());
+                        image.setPixelRGB(x, y, surfaceColor);
                     }
                 }
             }

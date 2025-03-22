@@ -2,6 +2,7 @@
 #define HAYA_LUZ_UTILITIES_H
 
 #include <cmath>
+#include <algorithm>
 
 class Utilities {
 public:
@@ -15,8 +16,10 @@ public:
         return valInRadians * (180 / M_PI);
     }
 
-    static uint convertTo256(const double value) {
-        return static_cast<uint>(value * 255);
+    static uint doubleTo256(const double value) {
+        return static_cast<uint>(
+            std::max(0.0, std::min(value * 255, 255.0))
+        );
     }
 };
 

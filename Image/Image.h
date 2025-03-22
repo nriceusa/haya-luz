@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Pixel.h"
+#include "../Utilities/Vector3.h"
 
 class Image {
 private:
@@ -30,6 +31,10 @@ public:
 
     void setPixelRGB(const uint x, const uint y, const double r, const double g, const double b) {
         pixels[x][y].setRGB(r, g, b);
+    }
+
+    void setPixelRGB(const uint x, const uint y, const Vector3& rgb) {
+        pixels[x][y].setRGB(rgb);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Image& image) {
