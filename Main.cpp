@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << scene << std::endl;
+    scene.alignToActiveCamera();
 
     std::ofstream& outputFile = FileManager::openOutputFile();
 

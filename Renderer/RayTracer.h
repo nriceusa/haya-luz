@@ -20,7 +20,7 @@ public:
     RayTracer(const uint glossyBounces, double minClippingDistance, double maxClippingDistance) :
         glossyBounces(glossyBounces), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
 
-    void render(Scene& scene, Image& image) const {
+    void render(const Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
         Vector3 rayVector = Vector3::normalize(camera.getRotation());
 
@@ -45,6 +45,8 @@ public:
 
                 // Check for intersections with geometry
                 double lowestDistance = maxClippingDistance;
+                const Geometry* closestGeometry = nullptr;
+
                 for (const Geometry* geo : scene.getGeometries()) {
                     const Geometry& geometry = *geo;
 
@@ -52,12 +54,20 @@ public:
 
                     if (distance < lowestDistance && distance > minClippingDistance) {
                         lowestDistance = distance;
-                        const Vector3 intersect = ray.at(distance);
-                        const Vector3 normal = geometry.getNormalAt(intersect);
-
-                        const Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, geometry.getMaterial());
-                        image.setPixelRGB(x, y, surfaceColor);
+                        closestGeometry = &geometry;
                     }
+                }
+
+                if (closestGeometry != nullptr) {
+                    const Vector3 intersect = ray.at(lowestDistance);
+                    const Vector3 normal = closestGeometry->getNormalAt(intersect);
+
+                    const Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, closestGeometry->getMaterial());
+
+                    image.setPixelRGB(x, y, surfaceColor);
+
+                    // image.setPixelRGB(x, y, Utilities::doubleTo256(color.getX()), Utilities::doubleTo256(color.getY()),
+                    //     Utilities::doubleTo256(color.getZ()));
                 }
             }
         }

@@ -6,6 +6,7 @@
 
 #include "../Scene.h"
 #include "../SceneComponents/Geometry/Sphere.h"
+#include "../Utilities/Utilities.h"
 #include "../Utilities/Vector3.h"
 
 class Ray {
@@ -91,8 +92,12 @@ public:
         const Light& light = *scene.getLights()[0];  // Only accounts for one light
         const Vector3 vectorToLight = Vector3::normalize(light.getLocation() - intersect);
         const Vector3 normalVector = Vector3::normalize(normal);
-        const Vector3 v = Vector3::normalize(origin - intersect);
-        const Vector3 d = Vector3::normalize(direction);
+        const Vector3 rayVector = Vector3::normalize(origin - intersect);
+        const Vector3 rayDirection = Vector3::normalize(direction);
+
+        std::cout << std::endl << "Light: " << light;
+        std::cout << "Light location: " << light.getLocation() << std::endl;
+        std::cout << "Vector to light: " << vectorToLight << std::endl;
 
         // Compute shadows
         bool inShadow = false;
@@ -109,7 +114,7 @@ public:
         }
 
         // Compute reflections
-        const Vector3 reflectionDirection = d - (2 * normalVector * (Vector3::dot(d, normalVector)));
+        const Vector3 reflectionDirection = rayDirection - (2 * normalVector * (Vector3::dot(rayDirection, normalVector)));
         const Ray reflectionRay(intersect + (normalVector * MIN_ERROR_DISTANCE), reflectionDirection, scene);
 
         const Vector3 ambientLight = scene.getSky().getAmbientLight();
@@ -126,7 +131,7 @@ public:
                     geometry.getNormalAt(reflectionIntersect), geometry.getMaterial());
             }
         }
-        const Vector3 ir = material.getSpecular() * reflectedColor;
+        const Vector3 glossyComponent = material.getSpecular() * reflectedColor;
 
         // Compute diffuse
         double angleToLight = Vector3::dot(normalVector, vectorToLight);
@@ -134,34 +139,30 @@ public:
             angleToLight = 0;
         }
         const Vector3 diffuse = material.getDiffuse() * light.getIntensity() * material.getDiffuseIntensity() * angleToLight;
-        // std::cout << "Diffuse: " << material << std::endl;
+
+        std::cout << "Angle to light: " << angleToLight << std::endl;
+        std::cout << "Diffuse: " << diffuse << std::endl;
 
         // Compute ambience
         const Vector3 ambience = material.getEmissionIntensity() * material.getEmissivity() * ambientLight;
 
         // Compute specular highlight
         const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;
-        double angleToReflection = Vector3::dot(v, r);
+        double angleToReflection = Vector3::dot(rayVector, r);
         if (angleToReflection < 0) {
             angleToReflection = 0;
         }
         const Vector3 specular = material.getSpecular() * light.getIntensity() *
             material.getSpecularIntensity() * pow(angleToReflection, material.getSpecularRoughness());
 
-        // std::cout << "Ambience: " << ambience << std::endl;
-        // std::cout << "IR: " << ir << std::endl;
-        // std::cout << "In shadow: " << inShadow << std::endl;
-        // std::cout << "Specular: " << specular << std::endl;
-        // std::cout << "Diffuse: " << diffuse << std::endl << std::endl;
-
         // Sum lighting components
-        Vector3 surfaceColor = ambience + ir;
+        Vector3 surfaceColor = ambience + glossyComponent;
         if (!inShadow) {
             surfaceColor += specular + diffuse;
         }
-        surfaceColor.setR(surfaceColor.getR() > 1 ? 1 : surfaceColor.getR() < 0 ? 0 : surfaceColor.getR());
-        surfaceColor.setG(surfaceColor.getG() > 1 ? 1 : surfaceColor.getG() < 0 ? 0 : surfaceColor.getG());
-        surfaceColor.setB(surfaceColor.getB() > 1 ? 1 : surfaceColor.getB() < 0 ? 0 : surfaceColor.getB());
+        surfaceColor.setR(Utilities::clamp(surfaceColor.getR(), 0, 1));
+        surfaceColor.setG(Utilities::clamp(surfaceColor.getG(), 0, 1));
+        surfaceColor.setB(Utilities::clamp(surfaceColor.getB(), 0, 1));
         return surfaceColor;
     }
 };

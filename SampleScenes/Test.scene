@@ -2,19 +2,19 @@
 SKY  0 0 0.2  2
 
 #  Ox Oy Oz  Tx Ty Tz  FOV
-CAMERA 5 5 5  0 0 0  45
+CAMERA  2 2 2  0 0 0  30
 
 # Dx Dy Dz  R G B  S
 DIRECTIONAL_LIGHT  -1 -1 -1  1 1 1  4
 
 #  X Y Z  R G B  S
-#POINT_LIGHT  1 1 3  0.1 0.8 0.1  3
+# POINT_LIGHT  -1 -1 3  0.1 0.8 0.1  3
 
 #  Mid  Dr Dg Db  Sr Sg Sb  Er Eg Eb  D S R E
-MATERIAL  1  0.8 0.1 0.1  1 1 1  1 1 1  1 0 0.1 0.1
+MATERIAL  1  0.8 0.1 0.1  1 1 1  1 1 1  1 0.5 0.1 0.1
 
 #  Mid  X Y Z  R
 SPHERE  1  0 0 0  0.5
 
 #  Mid  Num  X Y Z ... X Y Z
-#POLYGON  1  4  -2 0 0  -3 0 0  -3 -1 0  -2 -1 9
+# POLYGON  1  4  -2 0 0  -3 0 0  -3 -1 0  -2 -1 9

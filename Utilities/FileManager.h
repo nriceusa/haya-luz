@@ -47,6 +47,10 @@ public:
             std::string type;
             lineStream >> type;
 
+            if (type.empty() || type[0] == '#') {
+                continue;
+            }
+
             if (type == "SKY") {
                 const Vector3 intensity = readVector3(lineStream);
                 const double intensityScalar = readDouble(lineStream);
@@ -89,14 +93,12 @@ public:
                                   specular, specularRoughness, emissivity);
                 scene.addMaterial(material);
 
-                std::cout << ">>Material: " << material << std::endl;
-
             } else if (type == "SPHERE") {
                 const uint materialId = readUint(lineStream);
                 const Vector3 center = readVector3(lineStream);
                 const double radius = readDouble(lineStream);
 
-                Sphere sphere(scene.getMaterial(materialId), center, radius);
+                Sphere sphere(scene.getMaterial(materialId - 1), center, radius);
                 scene.addGeometry(sphere);
                 
             } else if (type == "TRIANGLE") {
@@ -118,9 +120,7 @@ public:
 
                 Polygon polygon(scene.getMaterial(materialId), points);
                 scene.addGeometry(polygon);
-
-            } else if (type == "" || type == "#") {
-                // Do nothing
+                
             } else {
                 std::cerr << "Error: Unknown type from input file: " << type << std::endl;
             }

@@ -21,6 +21,10 @@ public:
             std::max(0.0, std::min(value * 255, 255.0))
         );
     }
+
+    static double clamp(const double value, const double min, const double max) {
+        return std::max(min, std::min(value, max));
+    }
 };
 
 #endif //HAYA_LUZ_UTILITIES_H

@@ -37,23 +37,6 @@ private:
         component.setRotation(Vector3::rotate(component.getRotation(), rotationAxis, angle));
     }
 
-    void alignToActiveCamera() {
-        const Vector3 translation = -activeCamera->getLocation() + Vector3(0, 0, 1);
-
-        // Define the rotation
-        const Vector3 cameraRotation = Vector3::normalize(activeCamera->getRotation());
-        const Vector3 targetView(0, 0, 0);
-        const double angle = acos(Vector3::dot(cameraRotation, targetView));
-        Vector3 rotationAxis = Vector3::normalize(Vector3::cross(cameraRotation, targetView));
-
-        // Handle rotation edge case
-        if (rotationAxis.getLength() < 0.0001) {
-            rotationAxis = Vector3(0, 1, 0);
-        }
-        
-        transform(translation, rotationAxis, angle);
-    }
-
 public:
     Scene() = default;
 
@@ -83,6 +66,23 @@ public:
         }
     }
 
+    void alignToActiveCamera() {
+        const Vector3 translation = -activeCamera->getLocation() + Vector3(0, 0, 1);
+
+        // Define the rotation
+        const Vector3 cameraRotation = Vector3::normalize(activeCamera->getRotation());
+        const Vector3 targetView(0, 0, -1);
+        const double angle = acos(Vector3::dot(cameraRotation, targetView));
+        Vector3 rotationAxis = Vector3::normalize(Vector3::cross(cameraRotation, targetView));
+
+        // Handle rotation edge case
+        if (rotationAxis.getLength() < 0.0001) {
+            rotationAxis = Vector3(0, 1, 0);
+        }
+        
+        transform(translation, rotationAxis, angle);
+    }
+
     const Sky& getSky() const {
         return sky;
     }
@@ -100,7 +100,6 @@ public:
 
         if (cameras.size() == 1) {
             activeCamera = &cameras[0];
-            alignToActiveCamera();
         }
     }
 
@@ -111,7 +110,6 @@ public:
     void setActiveCamera(const uint index) {
         if (index < cameras.size()) {
             activeCamera = &cameras[index];
-            alignToActiveCamera();
         }
     }
 
