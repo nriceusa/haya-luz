@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "Color.h"
 #include "Pixel.h"
 #include "../Utilities/Vector3.h"
 
@@ -29,12 +30,12 @@ public:
         return pixels[x][y];
     }
 
-    void setPixelRGB(const uint x, const uint y, const double r, const double g, const double b) {
-        pixels[x][y].setRGB(r, g, b);
+    void setPixelColor(const uint x, const uint y, const Color& color) {
+        pixels[x][y].setRGB(color.getR(), color.getG(), color.getB());
     }
 
-    void setPixelRGB(const uint x, const uint y, const Vector3& rgb) {
-        pixels[x][y].setRGB(rgb);
+    void setPixelColor(const uint x, const uint y, const double r, const double g, const double b) {
+        pixels[x][y].setRGB(r, g, b);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Image& image) {

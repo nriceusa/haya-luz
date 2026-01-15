@@ -1,8 +1,8 @@
 #  R G B  Scale
 SKY  0 0 0.2  2
 
-#  Ox Oy Oz  Tx Ty Tz  FOV
-CAMERA  2 2 2  0 0 0  30
+#  OriginX  OriginY  OriginZ  TargetX TargetY TargetZ  FOV
+CAMERA  0 0 4  0 0 0  30
 
 # Dx Dy Dz  R G B  Scale
 DIRECTIONAL_LIGHT  -1 -1 -1  1 1 1  4

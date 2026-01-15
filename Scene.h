@@ -73,11 +73,16 @@ public:
         const Vector3 cameraRotation = Vector3::normalize(activeCamera->getRotation());
         const Vector3 targetView(0, 0, -1);
         const double angle = acos(Vector3::dot(cameraRotation, targetView));
-        Vector3 rotationAxis = Vector3::normalize(Vector3::cross(cameraRotation, targetView));
 
-        // Handle rotation edge case
-        if (rotationAxis.getLength() < 0.0001) {
+        // Calculate cross product first without normalizing
+        const Vector3 crossProduct = Vector3::cross(cameraRotation, targetView);
+        Vector3 rotationAxis;
+
+        // Handle rotation edge case (vectors are parallel)
+        if (crossProduct.getLength() < 0.0001) {
             rotationAxis = Vector3(0, 1, 0);
+        } else {
+            rotationAxis = Vector3::normalize(crossProduct);
         }
         
         transform(translation, rotationAxis, angle);

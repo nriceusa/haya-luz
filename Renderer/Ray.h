@@ -156,14 +156,14 @@ public:
             material.getSpecularIntensity() * pow(angleToReflection, material.getSpecularRoughness());
 
         // Sum lighting components
-        Vector3 surfaceColor = ambience + glossyComponent;
+        Vector3 surfaceRGB = ambience + glossyComponent;
         if (!inShadow) {
-            surfaceColor += specular + diffuse;
+            surfaceRGB += specular + diffuse;
         }
-        surfaceColor.setR(Utilities::clamp(surfaceColor.getR(), 0, 1));
-        surfaceColor.setG(Utilities::clamp(surfaceColor.getG(), 0, 1));
-        surfaceColor.setB(Utilities::clamp(surfaceColor.getB(), 0, 1));
-        return surfaceColor;
+        surfaceRGB.setR(Utilities::clamp(surfaceRGB.getR(), 0, 1));
+        surfaceRGB.setG(Utilities::clamp(surfaceRGB.getG(), 0, 1));
+        surfaceRGB.setB(Utilities::clamp(surfaceRGB.getB(), 0, 1));
+        return surfaceRGB;
     }
 };
 

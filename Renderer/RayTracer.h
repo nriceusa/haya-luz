@@ -40,7 +40,7 @@ public:
                 const Ray ray(camera.getOrigin(), rayVector, scene);
 
                 // Set background color
-                image.setPixelRGB(x, y, scene.getSky().getAmbientLight().getR(), scene.getSky().getAmbientLight().getG(),
+                image.setPixelColor(x, y, scene.getSky().getAmbientLight().getR(), scene.getSky().getAmbientLight().getG(),
                     scene.getSky().getAmbientLight().getB());
 
                 // Check for intersections with geometry
@@ -62,12 +62,10 @@ public:
                     const Vector3 intersect = ray.at(lowestDistance);
                     const Vector3 normal = closestGeometry->getNormalAt(intersect);
 
-                    const Vector3 surfaceColor = ray.computeSurface(glossyBounces, intersect, normal, closestGeometry->getMaterial());
+                    const Vector3 surfaceRGB = ray.computeSurface(glossyBounces, intersect, normal, closestGeometry->getMaterial());
+                    const Color surfaceColor(surfaceRGB.getR(), surfaceRGB.getG(), surfaceRGB.getB());
 
-                    image.setPixelRGB(x, y, surfaceColor);
-
-                    // image.setPixelRGB(x, y, Utilities::doubleTo256(color.getX()), Utilities::doubleTo256(color.getY()),
-                    //     Utilities::doubleTo256(color.getZ()));
+                    image.setPixelColor(x, y, surfaceColor);
                 }
             }
         }
