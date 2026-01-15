@@ -10,7 +10,7 @@ public:
     DirectionalLight(const double intensityScalar, const Vector3& intensity, const Vector3& direction) :
         Light(intensityScalar, intensity, Vector3(0, 0, 0), direction) {}
 
-    const Vector3& getLocation() const {
+    const Vector3 getLocation() const {
         return -getDirection() * MAX_ERROR_DISTANCE;
     }
 

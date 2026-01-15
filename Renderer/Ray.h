@@ -89,7 +89,7 @@ public:
             return {0, 0, 0};
         }
 
-        const Light& light = *scene.getLights()[0];  // Only accounts for one light
+        const DirectionalLight& light = scene.getDirectionalLights()[0]; // Only accounts for one light
         const Vector3 vectorToLight = Vector3::normalize(light.getLocation() - intersect);
         const Vector3 normalVector = Vector3::normalize(normal);
         const Vector3 rayVector = Vector3::normalize(origin - intersect);

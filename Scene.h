@@ -127,6 +127,14 @@ public:
         return lights;
     }
 
+    const std::vector<DirectionalLight>& getDirectionalLights() const {
+        return directionalLights;
+    }
+
+    const std::vector<PointLight>& getPointLights() const {
+        return pointLights;
+    }
+
     void addGeometry(Geometry& geometry) {
         if (Polygon* polygon = dynamic_cast<Polygon*>(&geometry)) {
             polygons.push_back(*polygon);
@@ -157,18 +165,18 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Scene& scene) {
-        os << "Scene: " << std::endl;
+        os << "# Scene" << std::endl;
         os << scene.getSky() << std::endl;
         for (const Camera& camera : scene.cameras) {
             if (&camera == scene.activeCamera) {
-                os << "<Active Camera>" << std::endl;
+                os << "**Active Camera**" << std::endl;
             }
             os << camera << std::endl;
         }
         for (const Light* light : scene.getLights()) {
             os << *light << std::endl;
         }
-        os << "Geometry: " << std::endl;
+        os << "# Geometry" << std::endl;
         for (const Geometry* geometry : scene.getGeometries()) {
             os << *geometry << std::endl;
         }
