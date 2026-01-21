@@ -64,8 +64,12 @@ public:
         setZ(newB);
     }
 
+    double getSquaredLength() const {
+        return x * x + y * y + z * z;
+    }
+
     double getLength() const {
-        return sqrt(x * x + y * y + z * z);
+        return sqrt(getSquaredLength());
     }
 
     Vector3 operator-() const {

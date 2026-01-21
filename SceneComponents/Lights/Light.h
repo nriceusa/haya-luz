@@ -22,15 +22,17 @@ protected:
     Light(const double intensityScalar, const Vector3& intensity, const Vector3& location,
           const Vector3& rotation, const Vector3& scale) :
         intensityScalar(intensityScalar), intensity(intensity), SceneComponent(location, rotation, scale) {}
-
-public:
+    
     const double getIntensityScalar() const {
         return intensityScalar;
     }
 
     const Vector3& getIntensity() const {
-        return intensity;
+        return intensity * intensityScalar;
     }
+
+public:
+    virtual const Vector3& computeRadianceAt(const Vector3& point) const = 0;
 
     virtual void print(std::ostream& os) const override = 0;
 };

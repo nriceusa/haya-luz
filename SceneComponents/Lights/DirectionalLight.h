@@ -18,6 +18,10 @@ public:
         return this->getRotation();
     }
 
+    const Vector3& computeRadianceAt(const Vector3& point) const override {
+        return this->getIntensity() * this->getIntensityScalar();
+    }
+
     void print(std::ostream& os) const override {
         os << "Directional Light:" << std::endl;
         os << "intensity scalar: " << this->getIntensityScalar() << std::endl;

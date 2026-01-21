@@ -89,6 +89,7 @@ public:
             return {0, 0, 0};
         }
 
+        // Compute lighting
         const DirectionalLight& light = scene.getDirectionalLights()[0]; // Only accounts for one light
         const Vector3 vectorToLight = Vector3::normalize(light.getLocation() - intersect);
         const Vector3 normalVector = Vector3::normalize(normal);
@@ -138,7 +139,7 @@ public:
         if (angleToLight < 0) {
             angleToLight = 0;
         }
-        const Vector3 diffuse = material.getDiffuse() * light.getIntensity() * material.getDiffuseIntensity() * angleToLight;
+        const Vector3 diffuse = material.getDiffuse() * light.computeRadianceAt(intersect) * material.getDiffuseIntensity() * angleToLight;
 
         std::cout << "Angle to light: " << angleToLight << std::endl;
         std::cout << "Diffuse: " << diffuse << std::endl;
@@ -152,7 +153,7 @@ public:
         if (angleToReflection < 0) {
             angleToReflection = 0;
         }
-        const Vector3 specular = material.getSpecular() * light.getIntensity() *
+        const Vector3 specular = material.getSpecular() * light.computeRadianceAt(intersect) *
             material.getSpecularIntensity() * pow(angleToReflection, material.getSpecularRoughness());
 
         // Sum lighting components
