@@ -27,12 +27,12 @@ protected:
         return intensityScalar;
     }
 
-    const Vector3& getIntensity() const {
+    const Vector3 getIntensity() const {
         return intensity * intensityScalar;
     }
 
 public:
-    virtual const Vector3& computeRadianceAt(const Vector3& point) const = 0;
+    virtual const Vector3 computeIlluminationAt(const Vector3& point) const = 0;
 
     virtual void print(std::ostream& os) const override = 0;
 };

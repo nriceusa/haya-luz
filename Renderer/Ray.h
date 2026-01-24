@@ -1,6 +1,7 @@
 #ifndef HAYA_LUZ_RAY_H
 #define HAYA_LUZ_RAY_H
 
+#define MIN_DIVISION 0.001
 #define MIN_ERROR_DISTANCE 0.001
 #define MAX_ERROR_DISTANCE 1000
 
@@ -78,9 +79,17 @@ public:
             return hitSphere(*sphere);
         } else if (const Triangle* triangle = dynamic_cast<const Triangle*>(&geometry)) {
             return hitTriangle(*triangle);
-        } else {
-            return -1;
+        } else if (const Polygon* polygon = dynamic_cast<const Polygon*>(&geometry)) {
+            // Convert polygon to triangles and test each
+            const std::vector<Triangle> triangles = polygon->generateTriangles();
+            for (const Triangle& triangle : triangles) {                
+                const double distance = hitTriangle(triangle);
+                if (distance > MIN_ERROR_DISTANCE) {
+                    return distance;
+                }
+            }
         }
+        return -1;
     }
 
     const Vector3 computeSurface(const uint numRecursions, const Vector3& intersect, const Vector3& normal,
@@ -88,37 +97,22 @@ public:
         if (numRecursions <= 0) {
             return {0, 0, 0};
         }
-
-        // Compute lighting
-        const DirectionalLight& light = scene.getDirectionalLights()[0]; // Only accounts for one light
-        const Vector3 vectorToLight = Vector3::normalize(light.getLocation() - intersect);
-        const Vector3 normalVector = Vector3::normalize(normal);
         const Vector3 rayVector = Vector3::normalize(origin - intersect);
         const Vector3 rayDirection = Vector3::normalize(direction);
-
-        std::cout << std::endl << "Light: " << light;
-        std::cout << "Light location: " << light.getLocation() << std::endl;
-        std::cout << "Vector to light: " << vectorToLight << std::endl;
-
-        // Compute shadows
-        bool inShadow = false;
-        const Vector3 shadowVector = Vector3::normalize(light.getLocation() - intersect);
-        const Ray shadowRay(intersect + (shadowVector * MIN_ERROR_DISTANCE), light.getLocation(), scene);
-        for (const Geometry* geo : scene.getGeometries()) {
-            const Geometry& geometry = *geo;
-
-            const double t = shadowRay.hit(geometry);
-            if (t > 0) {
-                inShadow = true;
-                break;
-            }
+        
+        Vector3 normalVector = Vector3::normalize(normal);
+        if (Vector3::dot(rayDirection, normalVector) > 0) {
+            normalVector = -normalVector;
         }
+        
+        // Compute ambience
+        const Vector3 ambientLight = scene.getSky().getAmbientLight();
+        const Vector3 ambience = material.getEmissionIntensity() * material.getEmissivity() * ambientLight;
 
         // Compute reflections
         const Vector3 reflectionDirection = rayDirection - (2 * normalVector * (Vector3::dot(rayDirection, normalVector)));
         const Ray reflectionRay(intersect + (normalVector * MIN_ERROR_DISTANCE), reflectionDirection, scene);
 
-        const Vector3 ambientLight = scene.getSky().getAmbientLight();
         Vector3 reflectedColor = ambientLight;
         double lowestDistance = MAX_ERROR_DISTANCE;
         for (const Geometry* geo : scene.getGeometries()) {
@@ -134,33 +128,51 @@ public:
         }
         const Vector3 glossyComponent = material.getSpecular() * reflectedColor;
 
-        // Compute diffuse
-        double angleToLight = Vector3::dot(normalVector, vectorToLight);
-        if (angleToLight < 0) {
-            angleToLight = 0;
-        }
-        const Vector3 diffuse = material.getDiffuse() * light.computeRadianceAt(intersect) * material.getDiffuseIntensity() * angleToLight;
-
-        std::cout << "Angle to light: " << angleToLight << std::endl;
-        std::cout << "Diffuse: " << diffuse << std::endl;
-
-        // Compute ambience
-        const Vector3 ambience = material.getEmissionIntensity() * material.getEmissivity() * ambientLight;
-
-        // Compute specular highlight
-        const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;
-        double angleToReflection = Vector3::dot(rayVector, r);
-        if (angleToReflection < 0) {
-            angleToReflection = 0;
-        }
-        const Vector3 specular = material.getSpecular() * light.computeRadianceAt(intersect) *
-            material.getSpecularIntensity() * pow(angleToReflection, material.getSpecularRoughness());
-
-        // Sum lighting components
         Vector3 surfaceRGB = ambience + glossyComponent;
-        if (!inShadow) {
+
+        for (const Light* light : scene.getLights()) {
+            const Vector3 lightOffset = light->getLocation() - intersect;
+            const Vector3 vectorToLight = Vector3::normalize(lightOffset);
+
+            // Compute shadows
+            bool inShadow = false;
+            const Ray shadowRay(intersect + (vectorToLight * MIN_ERROR_DISTANCE), lightOffset, scene);
+            for (const Geometry* geo : scene.getGeometries()) {
+                const Geometry& geometry = *geo;
+
+                const double t = shadowRay.hit(geometry);
+                if (t > 0 && t < 1) {
+                    inShadow = true;
+                    break;
+                }
+            }
+            if (inShadow) {
+                continue;
+            }
+
+            // Compute diffuse
+            double angleToLight = Vector3::dot(normalVector, vectorToLight);
+            if (angleToLight < 0) {
+                angleToLight = 0;
+            }
+            const Vector3 diffuse = material.getDiffuse() * light->computeIlluminationAt(intersect) * 
+                material.getDiffuseIntensity() * angleToLight;
+
+            // Compute specular highlight
+            const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;
+            double angleToReflection = Vector3::dot(rayVector, r);
+            if (angleToReflection < 0) {
+                angleToReflection = 0;
+            }
+            double specularRoughness = std::max(MIN_DIVISION, material.getSpecularRoughness());
+            double anglePower = pow(angleToReflection, (2 / (specularRoughness * specularRoughness)) - 2);
+            const Vector3 specular = material.getSpecular() * light->computeIlluminationAt(intersect) *
+                material.getSpecularIntensity() * anglePower;
+
+            // Sum lighting components
             surfaceRGB += specular + diffuse;
         }
+
         surfaceRGB.setR(Utilities::clamp(surfaceRGB.getR(), 0, 1));
         surfaceRGB.setG(Utilities::clamp(surfaceRGB.getG(), 0, 1));
         surfaceRGB.setB(Utilities::clamp(surfaceRGB.getB(), 0, 1));

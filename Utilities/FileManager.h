@@ -88,9 +88,11 @@ public:
                 const double specular = readDouble(lineStream);
                 const double specularRoughness = readDouble(lineStream);
                 const double emissivity = readDouble(lineStream);
+                const double transmission = readDouble(lineStream);
+                const double refractionIndex = readDouble(lineStream);
 
                 Material material(diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
-                                  specular, specularRoughness, emissivity);
+                                  specular, specularRoughness, emissivity, transmission, refractionIndex);
                 scene.addMaterial(material);
 
             } else if (type == "SPHERE") {
@@ -103,11 +105,11 @@ public:
                 
             } else if (type == "TRIANGLE") {
                 const uint materialId = readUint(lineStream);
-                const Vector3 point1 = readVector3(lineStream);
-                const Vector3 point2 = readVector3(lineStream);
-                const Vector3 point3 = readVector3(lineStream);
+                Vector3 point1 = readVector3(lineStream);
+                Vector3 point2 = readVector3(lineStream);
+                Vector3 point3 = readVector3(lineStream);
 
-                Triangle triangle(scene.getMaterial(materialId), point1, point2, point3);
+                Triangle triangle(scene.getMaterial(materialId - 1), point1, point2, point3);
                 scene.addGeometry(triangle);
 
             } else if (type == "POLYGON") {
@@ -118,7 +120,7 @@ public:
                     points.push_back(readVector3(lineStream));
                 }
 
-                Polygon polygon(scene.getMaterial(materialId), points);
+                Polygon polygon(scene.getMaterial(materialId - 1), points);
                 scene.addGeometry(polygon);
                 
             } else {

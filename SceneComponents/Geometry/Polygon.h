@@ -4,33 +4,40 @@
 #include <vector>
 
 #include "Geometry.h"
+#include "Triangle.h"
 
 class Polygon: public Geometry {
 private:
-    const std::vector<Vector3> points;
-    const Vector3 normal;
+    std::vector<Vector3> points;
+    Vector3 normal;
 
 public:
-    Polygon(Material &material, const std::vector<Vector3> &points) :
+    Polygon(Material& material, std::vector<Vector3>& points) :
         points(points),
-        normal(Vector3::normalize(Vector3::cross(points[1] - points[0], points[2] - points[0]))),
         Geometry(material, points[0])
     {
         Vector3 location;
-        for (Vector3 point : points) {
+        for (const Vector3& point : points) {
             location += point;
         }
         location /= points.size();
         setLocation(location);
 
-        // TODO: Implement triangulation and normal calculations
+        // Calculate normal
+        normal = Vector3(0, 0, 0);
+        for (uint i = 0; i < points.size(); ++i) {
+            const Vector3& currentPoint = points[i];
+            const Vector3& nextPoint = points[(i + 1) % points.size()];
+            normal += Vector3::cross(currentPoint - location, nextPoint - location);
+        }
+        normal = Vector3::normalize(normal);
     }
 
-    const Vector3 &getPoint(uint pointIndex) const {
+    const Vector3& getPoint(uint pointIndex) const {
         return points[pointIndex];
     }
 
-    const std::vector<Vector3> &getPoints() const {
+    const std::vector<Vector3>& getPoints() const {
         return points;
     }
 
@@ -38,17 +45,35 @@ public:
         return normal;
     }
 
-    const Vector3 getNormalAt(const Vector3 &point) const override {
+    const Vector3 getNormalAt(const Vector3& point) const override {
         return getNormal();
     }
+    
+    void transform(const Vector3& translation, const Vector3& rotationAxis, const double angle) override {
+        SceneComponent::transform(translation, rotationAxis, angle);
+        for (Vector3& point : points) {
+            point = Vector3::rotate(point + translation, rotationAxis, angle);
+        }
+        normal = Vector3::normalize(Vector3::rotate(normal, rotationAxis, angle));
+    }
 
-    void print(std::ostream &os) const override {
-        os << "Polygon:" << std::endl;
+    std::vector<Triangle> generateTriangles() const {
+        std::vector<Triangle> triangles;
+        for (uint i = 1; i < points.size() - 1; ++i) {
+            const Triangle triangle(this->material, points[0], points[i], points[i + 1]);
+            triangles.push_back(triangle);
+        }
+        return triangles;
+    }
+
+    void print(std::ostream& os) const override {
+        os << "## Polygon" << std::endl;
         os << "Points:" << std::endl;
-        for (const Vector3 &point : points) {
+        for (const Vector3& point : points) {
             os << point << std::endl;
         }
-        os << "Normal: " << std::endl << normal << std::endl;
+        os << "normal: " << normal << std::endl;
+        os << this->getMaterial() << std::endl;
     }
 };
 

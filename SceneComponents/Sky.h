@@ -29,7 +29,7 @@ public:
     }
 
     void print(std::ostream& os) const override {
-        os << "Sky:" << std::endl;
+        os << "## Sky" << std::endl;
         os << "intensity scalar: " << getIntensityScalar() << std::endl;
         os << "intensity: " << getIntensity() << std::endl;
     }

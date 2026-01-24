@@ -159,8 +159,10 @@ public:
         return vector / vector.getLength();
     }
 
-    static Vector3 rotate(const Vector3& vec, const Vector3& rotationAxis, double angle) {
-        return vec * cos(angle) + cross(rotationAxis, vec) * sin(angle) + rotationAxis * dot(rotationAxis, vec) * (1 - cos(angle));        
+    static Vector3 rotate(const Vector3& translation, const Vector3& rotationAxis, double angle) {
+        return translation * cos(angle) +
+               cross(rotationAxis, translation) * sin(angle) +
+               rotationAxis * dot(rotationAxis, translation) * (1 - cos(angle));        
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector3& vector) {

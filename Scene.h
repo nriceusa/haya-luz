@@ -19,50 +19,45 @@ private:
     Sky sky;
 
     Camera* activeCamera;
-    std::vector<Camera> cameras;
+    std::deque<Camera> cameras;
 
-    std::vector<const Light*> lights;
-    std::vector<DirectionalLight> directionalLights;
-    std::vector<PointLight> pointLights;
+    std::deque<const Light*> lights;
+    std::deque<DirectionalLight> directionalLights;
+    std::deque<PointLight> pointLights;
 
-    std::vector<const Geometry*> geometries;
-    std::vector<Polygon> polygons;
-    std::vector<Sphere> spheres;
-    std::vector<Triangle> triangles;
+    std::deque<const Geometry*> geometries;
+    std::deque<Polygon> polygons;
+    std::deque<Sphere> spheres;
+    std::deque<Triangle> triangles;
 
-    std::vector<Material> materials;
-
-    void rotateComponent(SceneComponent& component, const Vector3 translation, const Vector3& rotationAxis, const double angle) {
-        component.setLocation(Vector3::rotate(component.getLocation() + translation, rotationAxis, angle));
-        component.setRotation(Vector3::rotate(component.getRotation(), rotationAxis, angle));
-    }
+    std::deque<Material> materials;
 
 public:
     Scene() = default;
 
     void transform(const Vector3 translation, const Vector3 rotationAxis, const double angle) {
         for (Camera& camera : cameras) {
-            rotateComponent(camera, translation, rotationAxis, angle);
+            camera.transform(translation, rotationAxis, angle);
         }
 
         for (DirectionalLight& light : directionalLights) {
-            rotateComponent(light, translation, rotationAxis, angle);
+            light.transform(translation, rotationAxis, angle);
         }
 
         for (PointLight& light : pointLights) {
-            rotateComponent(light, translation, rotationAxis, angle);
+            light.transform(translation, rotationAxis, angle);
         }
 
         for (Polygon& polygon : polygons) {
-            rotateComponent(polygon, translation, rotationAxis, angle);
+            polygon.transform(translation, rotationAxis, angle);
         }
 
         for (Sphere& sphere : spheres) {
-            rotateComponent(sphere, translation, rotationAxis, angle);
+            sphere.transform(translation, rotationAxis, angle);
         }
 
         for (Triangle& triangle : triangles) {
-            rotateComponent(triangle, translation, rotationAxis, angle);
+            triangle.transform(translation, rotationAxis, angle);
         }
     }
 
@@ -128,15 +123,15 @@ public:
         }
     }
 
-    const std::vector<const Light*>& getLights() const {
+    const std::deque<const Light*>& getLights() const {
         return lights;
     }
 
-    const std::vector<DirectionalLight>& getDirectionalLights() const {
+    const std::deque<DirectionalLight>& getDirectionalLights() const {
         return directionalLights;
     }
 
-    const std::vector<PointLight>& getPointLights() const {
+    const std::deque<PointLight>& getPointLights() const {
         return pointLights;
     }
 
@@ -153,7 +148,7 @@ public:
         }
     }
 
-    const std::vector<const Geometry*>& getGeometries() const {
+    const std::deque<const Geometry*>& getGeometries() const {
         return geometries;
     }
 
@@ -161,7 +156,7 @@ public:
         return materials[index];
     }
 
-    const std::vector<Material>& getMaterials() const {
+    const std::deque<Material>& getMaterials() const {
         return materials;
     }
 

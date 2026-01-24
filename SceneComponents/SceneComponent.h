@@ -24,28 +24,33 @@ protected:
     virtual ~SceneComponent() = default;
 
 public:
-    const Vector3& getLocation() const {
+    virtual const Vector3& getLocation() const {
         return location;
     }
 
-    const Vector3& getRotation() const {
+    virtual const Vector3& getRotation() const {
         return rotation;
     }
 
-    const Vector3& getScale() const {
+    virtual const Vector3& getScale() const {
         return scale;
     }
 
-    void setLocation(const Vector3& newLocation) {
+    virtual void setLocation(const Vector3& newLocation) {
         location = newLocation;
     }
 
-    void setRotation(const Vector3& newRotation) {
+    virtual void setRotation(const Vector3& newRotation) {
         rotation = newRotation;
     }
 
-    void setScale(const Vector3& newScale) {
+    virtual void setScale(const Vector3& newScale) {
         scale = newScale;
+    }
+    
+    virtual void transform(const Vector3& translation, const Vector3& rotationAxis, const double angle) {
+        location = Vector3::rotate(location + translation, rotationAxis, angle);
+        rotation = Vector3::rotate(rotation, rotationAxis, angle);
     }
 
     virtual void print(std::ostream& os) const = 0;
