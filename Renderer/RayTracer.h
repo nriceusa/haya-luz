@@ -9,10 +9,10 @@
 
 class RayTracer {
 private:
-    uint glossyBounces;
-    uint pixelSamples;
-    double minClippingDistance;
-    double maxClippingDistance;
+    const uint glossyBounces;
+    const uint pixelSamples;
+    const double minClippingDistance;
+    const double maxClippingDistance;
 
 public:
     RayTracer() : glossyBounces(4), pixelSamples(1), minClippingDistance(MIN_CLIPPING_DISTANCE), maxClippingDistance(std::numeric_limits<double>::max()) {}
@@ -30,20 +30,32 @@ public:
         const double xOffset = rayVector.getZ() * tan(camera.getFieldOfView() / 2);
         const double yOffset = -xOffset * (static_cast<double>(image.getHeight()) / static_cast<double>(image.getWidth()));
         const double pixelWidth = (2 * -xOffset) / static_cast<double>(image.getWidth());
-        const double initialX = rayVector.getX() + xOffset;
-        const double initialY = rayVector.getY() + yOffset;
+        const double sampleWidth = pixelWidth / static_cast<double>(pixelSamples);
+        const double initialX = rayVector.getX() + xOffset + (sampleWidth / 2);
+        const double initialY = rayVector.getY() + yOffset + (sampleWidth / 2);
 
         rayVector.setX(initialX);
+        rayVector.setY(initialY);
         for (uint x = 0; x < image.getWidth(); ++x) {
-            rayVector.setX(rayVector.getX() + pixelWidth);
-
-            rayVector.setY(initialY);
             for (uint y = 0; y < image.getHeight(); ++y) {
+                Vector3 pixelColor(0, 0, 0);
+                for (uint sampleX = 0; sampleX < pixelSamples; ++sampleX) {
+                    for (uint sampleY = 0; sampleY < pixelSamples; ++sampleY) {
+                        rayVector.setY(rayVector.getY() - sampleWidth);
+                        const Ray ray(camera.getOrigin(), rayVector, scene, minClippingDistance, maxClippingDistance);
+                        pixelColor += ray.trace(glossyBounces);
+                    }
+                    rayVector.setX(rayVector.getX() + sampleWidth);
+                    rayVector.setY(rayVector.getY() + pixelWidth);
+                }
+                pixelColor /= static_cast<double>(pixelSamples * pixelSamples);
+                image.setPixelColor(x, y, pixelColor.getR(), pixelColor.getG(), pixelColor.getB());
+
+                rayVector.setX(rayVector.getX() - pixelWidth);
                 rayVector.setY(rayVector.getY() - pixelWidth);
-                const Ray ray(camera.getOrigin(), rayVector, scene, minClippingDistance, maxClippingDistance);
-                const Vector3 color = ray.trace(glossyBounces);
-                image.setPixelColor(x, y, color.getR(), color.getG(), color.getB());
             }
+            rayVector.setX(rayVector.getX() + pixelWidth);
+            rayVector.setY(initialY);
         }
     }
 };
