@@ -2,8 +2,6 @@
 #define HAYA_LUZ_RAY_H
 
 #define MIN_DIVISION 0.001
-#define MIN_ERROR_DISTANCE 0.001
-#define MAX_ERROR_DISTANCE 1000
 
 #include "../Scene.h"
 #include "../SceneComponents/Geometry/Sphere.h"
@@ -15,6 +13,9 @@ private:
     const Vector3 origin;
     const Vector3 direction;
     const Scene& scene;
+
+    const double minClippingDistance;
+    const double maxClippingDistance;
 
     double hitSphere(const Sphere& sphere) const {
         Vector3 oc = origin - sphere.getCenter();
@@ -58,9 +59,26 @@ private:
         }
     }
 
+    double hit(const Geometry& geometry) const {
+        if (const Sphere* sphere = dynamic_cast<const Sphere*>(&geometry)) {
+            return hitSphere(*sphere);
+        } else if (const Triangle* triangle = dynamic_cast<const Triangle*>(&geometry)) {
+            return hitTriangle(*triangle);
+        } else if (const Polygon* polygon = dynamic_cast<const Polygon*>(&geometry)) {
+            const std::vector<Triangle> triangles = polygon->generateTriangles();
+            for (const Triangle& triangle : triangles) {                
+                const double t = hitTriangle(triangle);
+                if (t > minClippingDistance) {
+                    return t;
+                }
+            }
+        }
+        return -1;
+    }
+
 public:
-    Ray(const Vector3& origin, const Vector3& direction, const Scene& scene) :
-        origin(origin), direction(direction), scene(scene) {}
+    Ray(const Vector3& origin, const Vector3& direction, const Scene& scene, double minClippingDistance, double maxClippingDistance) :
+        origin(origin), direction(direction), scene(scene), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
 
     const Vector3& getOrigin() const {
         return origin;
@@ -74,22 +92,27 @@ public:
         return origin + (position * direction);
     }
 
-    double hit(const Geometry& geometry) const {
-        if (const Sphere* sphere = dynamic_cast<const Sphere*>(&geometry)) {
-            return hitSphere(*sphere);
-        } else if (const Triangle* triangle = dynamic_cast<const Triangle*>(&geometry)) {
-            return hitTriangle(*triangle);
-        } else if (const Polygon* polygon = dynamic_cast<const Polygon*>(&geometry)) {
-            // Convert polygon to triangles and test each
-            const std::vector<Triangle> triangles = polygon->generateTriangles();
-            for (const Triangle& triangle : triangles) {                
-                const double distance = hitTriangle(triangle);
-                if (distance > MIN_ERROR_DISTANCE) {
-                    return distance;
-                }
+    const Vector3 trace(uint numRecursions) const {
+        double lowestDistance = maxClippingDistance;
+        const Geometry* closestGeometry = nullptr;
+
+        for (const Geometry* geo : scene.getGeometries()) {
+            const Geometry& geometry = *geo;
+
+            const double distance = this->hit(geometry);
+            if (distance < lowestDistance && distance > minClippingDistance) {
+                lowestDistance = distance;
+                const Vector3 intersection = this->at(distance);
+                closestGeometry = &geometry;
             }
         }
-        return -1;
+        
+        if (closestGeometry != nullptr) {
+            const Vector3 intersection = this->at(lowestDistance);
+            return this->computeSurface(numRecursions, intersection,
+                closestGeometry->getNormalAt(intersection), closestGeometry->getMaterial());
+        }
+        return scene.getSky().getAmbientLight();
     }
 
     const Vector3 computeSurface(const uint numRecursions, const Vector3& intersect, const Vector3& normal,
@@ -101,34 +124,42 @@ public:
         const Vector3 rayDirection = Vector3::normalize(direction);
         
         Vector3 normalVector = Vector3::normalize(normal);
-        if (Vector3::dot(rayDirection, normalVector) > 0) {
+        const bool frontFace = Vector3::dot(rayDirection, normalVector) < 0;
+        if (!frontFace) {
             normalVector = -normalVector;
         }
         
         // Compute ambience
         const Vector3 ambientLight = scene.getSky().getAmbientLight();
         const Vector3 ambience = material.getEmissionIntensity() * material.getEmissivity() * ambientLight;
-
+        Vector3 surfaceRGB = ambience;
+        
         // Compute reflections
         const Vector3 reflectionDirection = rayDirection - (2 * normalVector * (Vector3::dot(rayDirection, normalVector)));
-        const Ray reflectionRay(intersect + (normalVector * MIN_ERROR_DISTANCE), reflectionDirection, scene);
+        const Ray reflectionRay(intersect + (normalVector * minClippingDistance), reflectionDirection, scene, minClippingDistance, maxClippingDistance);
+        Vector3 reflectedColor = reflectionRay.trace(numRecursions - 1);
+        const Vector3 glossyComponent = material.getSpecular() * reflectedColor;
+        surfaceRGB += glossyComponent;
 
-        Vector3 reflectedColor = ambientLight;
-        double lowestDistance = MAX_ERROR_DISTANCE;
-        for (const Geometry* geo : scene.getGeometries()) {
-            const Geometry& geometry = *geo;
+        // Compute refractions
+        double airIndex = 1.0;
+        const double refractionRatio = frontFace
+            ? (airIndex / material.getRefractionIndex())
+            : (material.getRefractionIndex() / airIndex);
+        
+        if (material.getTransmission() > 0) {
+            const double cosThetaI = -Vector3::dot(normalVector, rayDirection);
+            const double sin2ThetaT = refractionRatio * refractionRatio * (1 - cosThetaI * cosThetaI);
 
-            const double distance = reflectionRay.hit(geometry);
-            if (distance < lowestDistance && distance > MIN_ERROR_DISTANCE) {
-                lowestDistance = distance;
-                const Vector3 reflectionIntersect = reflectionRay.at(distance);
-                reflectedColor = reflectionRay.computeSurface(numRecursions - 1, reflectionIntersect,
-                    geometry.getNormalAt(reflectionIntersect), geometry.getMaterial());
+            if (sin2ThetaT <= 1) {
+                const double cosThetaT = sqrt(1 - sin2ThetaT);
+                const Vector3 refractionDirection = (refractionRatio * rayDirection) +
+                    (refractionRatio * cosThetaI - cosThetaT) * normalVector;
+                const Ray refractionRay(intersect - (normalVector * minClippingDistance), refractionDirection, scene, minClippingDistance, maxClippingDistance);
+                Vector3 refractedColor = refractionRay.trace(numRecursions - 1);
+                surfaceRGB += material.getTransmission() * refractedColor;
             }
         }
-        const Vector3 glossyComponent = material.getSpecular() * reflectedColor;
-
-        Vector3 surfaceRGB = ambience + glossyComponent;
 
         for (const Light* light : scene.getLights()) {
             const Vector3 lightOffset = light->getLocation() - intersect;
@@ -136,7 +167,7 @@ public:
 
             // Compute shadows
             bool inShadow = false;
-            const Ray shadowRay(intersect + (vectorToLight * MIN_ERROR_DISTANCE), lightOffset, scene);
+            const Ray shadowRay(intersect + (vectorToLight * minClippingDistance), lightOffset, scene, minClippingDistance, maxClippingDistance);
             for (const Geometry* geo : scene.getGeometries()) {
                 const Geometry& geometry = *geo;
 
@@ -156,7 +187,7 @@ public:
                 angleToLight = 0;
             }
             const Vector3 diffuse = material.getDiffuse() * light->computeIlluminationAt(intersect) * 
-                material.getDiffuseIntensity() * angleToLight;
+                material.getDiffuseIntensity() * angleToLight * (1 - material.getTransmission());
 
             // Compute specular highlight
             const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;

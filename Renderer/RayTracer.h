@@ -1,6 +1,8 @@
 #ifndef HAYA_LUZ_RAYTRACER_H
 #define HAYA_LUZ_RAYTRACER_H
 
+#define MIN_CLIPPING_DISTANCE 0.001
+
 #include "../Image/Image.h"
 #include "Ray.h"
 #include "../Scene.h"
@@ -8,17 +10,18 @@
 class RayTracer {
 private:
     uint glossyBounces;
+    uint pixelSamples;
     double minClippingDistance;
     double maxClippingDistance;
 
 public:
-    RayTracer() : glossyBounces(4), minClippingDistance(0), maxClippingDistance(std::numeric_limits<double>::max()) {}
+    RayTracer() : glossyBounces(4), pixelSamples(1), minClippingDistance(MIN_CLIPPING_DISTANCE), maxClippingDistance(std::numeric_limits<double>::max()) {}
 
-    RayTracer(const uint glossyBounces) :
-        glossyBounces(glossyBounces), minClippingDistance(0), maxClippingDistance(std::numeric_limits<double>::max()) {}
+    RayTracer(const uint glossyBounces, const uint pixelSamples) :
+        glossyBounces(glossyBounces), pixelSamples(pixelSamples), minClippingDistance(MIN_CLIPPING_DISTANCE), maxClippingDistance(std::numeric_limits<double>::max()) {}
 
-    RayTracer(const uint glossyBounces, double minClippingDistance, double maxClippingDistance) :
-        glossyBounces(glossyBounces), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
+    RayTracer(const uint glossyBounces, const uint pixelSamples, double minClippingDistance, double maxClippingDistance) :
+        glossyBounces(glossyBounces), pixelSamples(pixelSamples), minClippingDistance(std::max(minClippingDistance, MIN_CLIPPING_DISTANCE)), maxClippingDistance(maxClippingDistance) {}
 
     void render(const Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
@@ -37,36 +40,9 @@ public:
             rayVector.setY(initialY);
             for (uint y = 0; y < image.getHeight(); ++y) {
                 rayVector.setY(rayVector.getY() - pixelWidth);
-                const Ray ray(camera.getOrigin(), rayVector, scene);
-
-                // Set background color
-                image.setPixelColor(x, y, scene.getSky().getAmbientLight().getR(), scene.getSky().getAmbientLight().getG(),
-                    scene.getSky().getAmbientLight().getB());
-
-                // Check for intersections with geometry
-                double lowestDistance = maxClippingDistance;
-                const Geometry* closestGeometry = nullptr;
-
-                for (const Geometry* geo : scene.getGeometries()) {
-                    const Geometry& geometry = *geo;
-
-                    const double distance = ray.hit(geometry);
-
-                    if (distance < lowestDistance && distance > minClippingDistance) {
-                        lowestDistance = distance;
-                        closestGeometry = &geometry;
-                    }
-                }
-
-                if (closestGeometry != nullptr) {
-                    const Vector3 intersect = ray.at(lowestDistance);
-                    const Vector3 normal = closestGeometry->getNormalAt(intersect);
-
-                    const Vector3 surfaceRGB = ray.computeSurface(glossyBounces, intersect, normal, closestGeometry->getMaterial());
-                    const Color surfaceColor(surfaceRGB.getR(), surfaceRGB.getG(), surfaceRGB.getB());
-
-                    image.setPixelColor(x, y, surfaceColor);
-                }
+                const Ray ray(camera.getOrigin(), rayVector, scene, minClippingDistance, maxClippingDistance);
+                const Vector3 color = ray.trace(glossyBounces);
+                image.setPixelColor(x, y, color.getR(), color.getG(), color.getB());
             }
         }
     }

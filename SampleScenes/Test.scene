@@ -2,7 +2,7 @@
 SKY  0 0 0.2  2
 
 #  OriginX  OriginY  OriginZ  TargetX TargetY TargetZ  FOV
-CAMERA  0 1 4  0 0 0  45
+CAMERA  0 0.5 2  0 0.5 0  45
 
 # Dx Dy Dz  R G B  Scale
 DIRECTIONAL_LIGHT  -1 -1 -1  1 1 1  1
@@ -11,11 +11,17 @@ DIRECTIONAL_LIGHT  -1 -1 -1  1 1 1  1
 POINT_LIGHT  -3 -3 0  1 1 1  2
 
 #  MatID  Dr Dg Db  Sr Sg Sb  Er Eg Eb  Diffuse Specular Roughness  Emissivity Transmission IOR
-MATERIAL  1  0.8 0.1 0.1  1 1 1  1 1 1  1 0.1 0.5 1  1 1.5
-MATERIAL  2  0.1 0.8 0.1  1 1 1  1 1 1  1 0.1 0.5 1  0 1.5
+MATERIAL  1  0.8 0.1 0.1  1 1 1  1 1 1  1 0.1 0.1  0.1 1 1.5
+MATERIAL  2  0.1 0.8 0.1  1 1 1  1 1 1  1 0.1 0.5  0.1 0 1.5
+MATERIAL  3  0.8 0.8 0.1  1 1 1  1 1 1  1 0.1 0.5  0.1 0 1.5
+MATERIAL  4  0.1 0.8 0.8  1 1 1  1 1 1  1 0.1 0.5  0.1 0 1.5
+MATERIAL  5  0.8 0.1 0.1  1 1 1  1 1 1  1 0.1 0.5  0.1 0 1.5
 
 #  MatID  X Y Z  Radius
 SPHERE  1  0 0.5 0  0.5
+SPHERE  3  -0.75 0.5 -0.75  0.5
+SPHERE  4  0.75 0.5 -0.75  0.5
+SPHERE  5  0 0.5 -1.5  0.5
 
 #  MatID  Num  X Y Z ... X Y Z
 POLYGON  2  4  -1 0 0  0 0 -1  1 0 0  0 0 1

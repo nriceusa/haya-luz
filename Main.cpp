@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     const uint image_height = 128;
     Image image(image_width, image_height);
 
-    RayTracer rayTracer;
+    RayTracer rayTracer(3, 4);
     rayTracer.render(scene, image);
 
     FileManager::saveImageAsPPM(image, outputFile);
