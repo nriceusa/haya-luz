@@ -148,15 +148,19 @@ public:
             : (material.getRefractionIndex() / airIndex);
         
         if (material.getTransmission() > 0) {
-            const double cosThetaI = -Vector3::dot(normalVector, rayDirection);
+            const double cosThetaI = std::min(-Vector3::dot(-rayDirection, normalVector), 1.0);
             const double sin2ThetaT = refractionRatio * refractionRatio * (1 - cosThetaI * cosThetaI);
 
             if (sin2ThetaT <= 1) {
                 const double cosThetaT = sqrt(1 - sin2ThetaT);
-                const Vector3 refractionDirection = (refractionRatio * rayDirection) +
-                    (refractionRatio * cosThetaI - cosThetaT) * normalVector;
+
+                const Vector3 refractionPerp =  refractionRatio * (rayDirection + cosThetaI * normalVector);
+                const Vector3 refractionParallel = -std::sqrt(std::abs(1.0 - refractionPerp.getSquaredLength())) * normalVector;
+                const Vector3 refractionDirection = refractionPerp + refractionParallel;
+                
                 const Ray refractionRay(intersect - (normalVector * minClippingDistance), refractionDirection, scene, minClippingDistance, maxClippingDistance);
                 Vector3 refractedColor = refractionRay.trace(numRecursions - 1);
+
                 surfaceRGB += material.getTransmission() * refractedColor;
             }
         }

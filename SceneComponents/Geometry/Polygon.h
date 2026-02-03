@@ -11,6 +11,20 @@ private:
     std::vector<Vector3> points;
     Vector3 normal;
 
+    AxisAlignedPrism computeBoundingVolume() override {
+        Vector3 minCorner = points[0];
+        Vector3 maxCorner = points[0];
+        for (const Vector3& point : points) {
+            if (point.getX() < minCorner.getX()) minCorner.setX(point.getX());
+            if (point.getY() < minCorner.getY()) minCorner.setY(point.getY());
+            if (point.getZ() < minCorner.getZ()) minCorner.setZ(point.getZ());
+            if (point.getX() > maxCorner.getX()) maxCorner.setX(point.getX());
+            if (point.getY() > maxCorner.getY()) maxCorner.setY(point.getY());
+            if (point.getZ() > maxCorner.getZ()) maxCorner.setZ(point.getZ());
+        }
+        return AxisAlignedPrism{minCorner, maxCorner};
+    }
+
 public:
     Polygon(Material& material, std::vector<Vector3>& points) :
         points(points),

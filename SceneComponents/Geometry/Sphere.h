@@ -7,10 +7,19 @@ class Sphere : public Geometry {
 private:
     double radius;
 
-public:
-    Sphere(Material& material, const Vector3& center) : Geometry(material, center), radius(1) {}
+    AxisAlignedPrism computeBoundingVolume() override {
+        Vector3 center = this->getLocation();
+        Vector3 minCorner = Vector3(center.getX() - radius, center.getY() - radius, center.getZ() - radius);
+        Vector3 maxCorner = Vector3(center.getX() + radius, center.getY() + radius, center.getZ() + radius);
+        return AxisAlignedPrism{minCorner, maxCorner};
+    }
 
-    Sphere(Material& material, const Vector3& center, double radius) : Geometry(material, center), radius(radius) {}
+public:
+    Sphere(Material& material, const Vector3& center) :
+        Geometry(material, center), radius(1) {}
+
+    Sphere(Material& material, const Vector3& center, double radius) :
+        Geometry(material, center), radius(radius) {}
 
     const Vector3& getCenter() const {
         return this->getLocation();
