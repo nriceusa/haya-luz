@@ -1,6 +1,6 @@
 # Haya Luz
 
-Compilation command: `g++ -std=c++11 Main.cpp -o haya-luz`\
+Compilation command: `make`\
 Execution command: `./haya-luz SampleScenes/Test.scene`
 
 Scene file format key:

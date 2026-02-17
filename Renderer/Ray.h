@@ -78,7 +78,11 @@ private:
 
 public:
     Ray(const Vector3& origin, const Vector3& direction, const Scene& scene, double minClippingDistance, double maxClippingDistance) :
-        origin(origin), direction(direction), scene(scene), minClippingDistance(minClippingDistance), maxClippingDistance(maxClippingDistance) {}
+        origin(origin),
+        direction(direction),
+        scene(scene),
+        minClippingDistance(minClippingDistance),
+        maxClippingDistance(maxClippingDistance) {}
 
     const Vector3& getOrigin() const {
         return origin;
@@ -135,9 +139,20 @@ public:
         Vector3 surfaceRGB = ambience;
         
         // Compute reflections
-        const Vector3 reflectionDirection = rayDirection - (2 * normalVector * (Vector3::dot(rayDirection, normalVector)));
-        const Ray reflectionRay(intersect + (normalVector * minClippingDistance), reflectionDirection, scene, minClippingDistance, maxClippingDistance);
-        Vector3 reflectedColor = reflectionRay.trace(numRecursions - 1);
+        const Vector3 reflectionDirection = Vector3::normalize(
+            Vector3::jitter(
+                rayDirection - (2 * normalVector * (Vector3::dot(rayDirection, normalVector))),
+                material.getSpecularRoughness()
+            )
+        );
+        const Ray reflectionRay(
+            intersect + (normalVector * minClippingDistance),
+            reflectionDirection,
+            scene,
+            minClippingDistance,
+            maxClippingDistance
+        );
+        const Vector3 reflectedColor = reflectionRay.trace(numRecursions - 1);
         const Vector3 glossyComponent = material.getSpecular() * reflectedColor;
         surfaceRGB += glossyComponent;
 
@@ -156,10 +171,13 @@ public:
 
                 const Vector3 refractionPerp =  refractionRatio * (rayDirection + cosThetaI * normalVector);
                 const Vector3 refractionParallel = -std::sqrt(std::abs(1.0 - refractionPerp.getSquaredLength())) * normalVector;
-                const Vector3 refractionDirection = refractionPerp + refractionParallel;
+                const Vector3 refractionDirection = Vector3::jitter(
+                    refractionPerp + refractionParallel,
+                    material.getSpecularRoughness()
+                );
                 
                 const Ray refractionRay(intersect - (normalVector * minClippingDistance), refractionDirection, scene, minClippingDistance, maxClippingDistance);
-                Vector3 refractedColor = refractionRay.trace(numRecursions - 1);
+                const Vector3 refractedColor = refractionRay.trace(numRecursions - 1);
 
                 surfaceRGB += material.getTransmission() * refractedColor;
             }

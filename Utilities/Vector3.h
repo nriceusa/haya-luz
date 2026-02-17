@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iosfwd>
 #include <ostream>
+#include <random>
 
 class Vector3 {
 private:
@@ -153,6 +154,14 @@ public:
         return Vector3{vectorLeft.getY() * vectorRight.getZ() - vectorLeft.getZ() * vectorRight.getY(),
                        vectorLeft.getZ() * vectorRight.getX() - vectorLeft.getX() * vectorRight.getZ(),
                        vectorLeft.getX() * vectorRight.getY() - vectorLeft.getY() * vectorRight.getX()};
+    }
+
+    static Vector3 jitter(const Vector3& vector, const double amount) {
+        static std::mt19937 generator; 
+        std::uniform_real_distribution<double> distribution(-amount, amount);
+        return Vector3{vector.getX() + distribution(generator),
+                       vector.getY() + distribution(generator),
+                       vector.getZ() + distribution(generator)};
     }
 
     static Vector3 normalize(const Vector3& vector) {
