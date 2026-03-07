@@ -9,7 +9,9 @@
 #include "SceneComponents/Geometry/Polygon.h"
 #include "SceneComponents/Geometry/Sphere.h"
 #include "SceneComponents/Geometry/Triangle.h"
+#include "SceneComponents/Lights/AreaLight.h"
 #include "SceneComponents/Lights/DirectionalLight.h"
+#include "SceneComponents/Lights/PointLight.h"
 #include "SceneComponents/Lights/Light.h"
 #include "SceneComponents/Lights/PointLight.h"
 #include "SceneComponents/Sky.h"
@@ -22,6 +24,7 @@ private:
     std::deque<Camera> cameras;
 
     std::deque<const Light*> lights;
+    std::deque<AreaLight> areaLights;
     std::deque<DirectionalLight> directionalLights;
     std::deque<PointLight> pointLights;
 
@@ -38,6 +41,10 @@ public:
     void transform(const Vector3 translation, const Vector3 rotationAxis, const double angle) {
         for (Camera& camera : cameras) {
             camera.transform(translation, rotationAxis, angle);
+        }
+
+        for (AreaLight& light : areaLights) {
+            light.transform(translation, rotationAxis, angle);
         }
 
         for (DirectionalLight& light : directionalLights) {
@@ -120,6 +127,9 @@ public:
         } else if (const PointLight* pointLight = dynamic_cast<const PointLight*>(&light)) {
             pointLights.push_back(*pointLight);
             lights.push_back(&pointLights.back());
+        } else if (const AreaLight* areaLight = dynamic_cast<const AreaLight*>(&light)) {
+            areaLights.push_back(*areaLight);
+            lights.push_back(&areaLights.back());
         }
     }
 
@@ -173,6 +183,7 @@ public:
             }
             os << camera << std::endl;
         }
+        os << "# Lights" << std::endl;
         for (const Light* light : scene.getLights()) {
             os << *light << std::endl;
         }

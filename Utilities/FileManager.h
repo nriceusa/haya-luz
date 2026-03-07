@@ -9,7 +9,9 @@
 #include "../SceneComponents/Geometry/Polygon.h"
 #include "../SceneComponents/Geometry/Sphere.h"
 #include "../SceneComponents/Geometry/Triangle.h"
+#include "../SceneComponents/Lights/AreaLight.h"
 #include "../SceneComponents/Lights/DirectionalLight.h"
+#include "../SceneComponents/Lights/PointLight.h"
 #include "../SceneComponents/Sky.h"
 #include "Utilities.h"
 
@@ -77,6 +79,16 @@ public:
                 const double intensityScalar = readDouble(lineStream);
 
                 scene.addLight(PointLight(intensityScalar, intensity, location));
+
+            } else if (type == "AREA_LIGHT") {
+                const Vector3 location = readVector3(lineStream);
+                const Vector3 rotation = readVector3(lineStream);
+                const double width = readDouble(lineStream);
+                const double height = readDouble(lineStream);
+                const Vector3 intensity = readVector3(lineStream);
+                const double intensityScalar = readDouble(lineStream);
+
+                scene.addLight(AreaLight(intensityScalar, intensity, location, rotation, width, height));
 
             } else if (type == "MATERIAL") {
                 const uint id = readUint(lineStream);

@@ -157,7 +157,7 @@ public:
     }
 
     static Vector3 jitter(const Vector3& vector, const double amount) {
-        static std::mt19937 generator; 
+        static std::mt19937 generator;
         std::uniform_real_distribution<double> distribution(-amount, amount);
         return Vector3{vector.getX() + distribution(generator),
                        vector.getY() + distribution(generator),
