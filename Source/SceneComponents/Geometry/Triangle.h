@@ -11,7 +11,7 @@ private:
 
     Vector3 normal;
 
-    AxisAlignedPrism computeBoundingVolume() override {
+    AxisAlignedBox computeBoundingVolume() override {
         Vector3 minCorner(
             std::min({point1.getX(), point2.getX(), point3.getX()}),
             std::min({point1.getY(), point2.getY(), point3.getY()}),
@@ -22,7 +22,7 @@ private:
             std::max({point1.getY(), point2.getY(), point3.getY()}),
             std::max({point1.getZ(), point2.getZ(), point3.getZ()})
         );
-        return AxisAlignedPrism{minCorner, maxCorner};
+        return AxisAlignedBox{minCorner, maxCorner};
     }
 
 public:

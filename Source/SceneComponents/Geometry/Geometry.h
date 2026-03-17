@@ -1,7 +1,7 @@
 #ifndef HAYA_LUZ_GEOMETRY_H
 #define HAYA_LUZ_GEOMETRY_H
 
-#include "AxisAlignedPrism.h"
+#include "AxisAlignedBox.h"
 #include "Material.h"
 #include "../SceneComponent.h"
 
@@ -11,20 +11,20 @@ private:
 
 protected:
     Material material;
-    AxisAlignedPrism boundingVolume;
+    AxisAlignedBox boundingVolume;
+
+    virtual AxisAlignedBox computeBoundingVolume() = 0;
 
     Geometry(const Material& material, const Vector3& location) :
-    SceneComponent(location), material(material), boundingVolume(AxisAlignedPrism()) {}
+        SceneComponent(location), material(material) {}
     
     Geometry(
         const Material& material,
         const Vector3& location,
         const Vector3& rotation,
-        const Vector3& scale,
-        const AxisAlignedPrism& boundingVolume) :
-        SceneComponent(location, rotation, scale), material(material), boundingVolume(boundingVolume) {}
+        const Vector3& scale) :
+        SceneComponent(location, rotation, scale), material(material) {}
     
-    virtual AxisAlignedPrism computeBoundingVolume() = 0;
 
 public:
     const Material& getMaterial() const {
@@ -35,7 +35,7 @@ public:
         material = newMaterial;
     }
 
-    const AxisAlignedPrism& getBoundingVolume() {
+    const AxisAlignedBox& getBoundingVolume() {
         if (!boundingVolumeUpdated) {
             boundingVolume = computeBoundingVolume();
             boundingVolumeUpdated = true;

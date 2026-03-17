@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SceneComponents/Camera.h"
+#include "SceneComponents/Geometry/AxisAlignedBox.h"
 #include "SceneComponents/Geometry/Geometry.h"
 #include "SceneComponents/Geometry/Material.h"
 #include "SceneComponents/Geometry/Polygon.h"
@@ -18,6 +19,35 @@
 
 class Scene {
 private:
+    void initializeBoundingVolume(const uint volumeSubdivLimit, const uint volumeContentsLimit) {
+        if (geometries.empty()) {
+            boundingVolume = AxisAlignedBox();
+        } else {
+            double minX = geometries[0]->getBoundingVolume().getMinX();
+            double minY = geometries[0]->getBoundingVolume().getMinY();
+            double minZ = geometries[0]->getBoundingVolume().getMinZ();
+            double maxX = geometries[0]->getBoundingVolume().getMaxX();
+            double maxY = geometries[0]->getBoundingVolume().getMaxY();
+            double maxZ = geometries[0]->getBoundingVolume().getMaxZ();
+            for (Geometry* geometry : geometries) {
+                const AxisAlignedBox& geometryBoundingVolume = geometry->getBoundingVolume();
+                minX = std::min(minX, geometryBoundingVolume.getMinX());
+                minY = std::min(minY, geometryBoundingVolume.getMinY());
+                minZ = std::min(minZ, geometryBoundingVolume.getMinZ());
+                maxX = std::max(maxX, geometryBoundingVolume.getMaxX());
+                maxY = std::max(maxY, geometryBoundingVolume.getMaxY());
+                maxZ = std::max(maxZ, geometryBoundingVolume.getMaxZ());
+            }
+            boundingVolume = AxisAlignedBox(Vector3(minX, minY, minZ), Vector3(maxX, maxY, maxZ), geometries);
+            boundingVolume.recursiveSubdivide(volumeSubdivLimit, volumeContentsLimit);
+        }
+    }
+
+    AxisAlignedBox boundingVolume;
+    bool boundingVolumeUpdated = false;
+    const uint volumeSubdivLimit;
+    const uint volumeContentsLimit;
+
     Sky sky;
 
     Camera* activeCamera;
@@ -28,7 +58,7 @@ private:
     std::deque<DirectionalLight> directionalLights;
     std::deque<PointLight> pointLights;
 
-    std::deque<const Geometry*> geometries;
+    std::deque<Geometry*> geometries;
     std::deque<Polygon> polygons;
     std::deque<Sphere> spheres;
     std::deque<Triangle> triangles;
@@ -36,7 +66,15 @@ private:
     std::deque<Material> materials;
 
 public:
-    Scene() = default;
+    Scene() : volumeSubdivLimit(20), volumeContentsLimit(3) {};
+
+    const AxisAlignedBox& getBoundingVolume() {
+        if (!boundingVolumeUpdated) {
+            initializeBoundingVolume(volumeSubdivLimit, volumeContentsLimit);
+            boundingVolumeUpdated = true;
+        }
+        return boundingVolume;
+    }
 
     void transform(const Vector3 translation, const Vector3 rotationAxis, const double angle) {
         for (Camera& camera : cameras) {
@@ -147,18 +185,18 @@ public:
 
     void addGeometry(Geometry& geometry) {
         if (Polygon* polygon = dynamic_cast<Polygon*>(&geometry)) {
-            polygons.push_back(*polygon);
+            polygons.push_back(std::move(*polygon));
             geometries.push_back(&polygons.back());
         } else if (Sphere* sphere = dynamic_cast<Sphere*>(&geometry)) {
-            spheres.push_back(*sphere);
+            spheres.push_back(std::move(*sphere));
             geometries.push_back(&spheres.back());
         } else if (Triangle* triangle = dynamic_cast<Triangle*>(&geometry)) {
-            triangles.push_back(*triangle);
+            triangles.push_back(std::move(*triangle));
             geometries.push_back(&triangles.back());
         }
     }
 
-    const std::deque<const Geometry*>& getGeometries() const {
+    const std::deque<Geometry*>& getGeometries() const {
         return geometries;
     }
 

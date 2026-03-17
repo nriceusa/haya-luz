@@ -7,11 +7,11 @@ class Sphere : public Geometry {
 private:
     double radius;
 
-    AxisAlignedPrism computeBoundingVolume() override {
+    AxisAlignedBox computeBoundingVolume() override {
         Vector3 center = this->getLocation();
         Vector3 minCorner = Vector3(center.getX() - radius, center.getY() - radius, center.getZ() - radius);
         Vector3 maxCorner = Vector3(center.getX() + radius, center.getY() + radius, center.getZ() + radius);
-        return AxisAlignedPrism{minCorner, maxCorner};
+        return AxisAlignedBox{minCorner, maxCorner};
     }
 
 public:

@@ -1,18 +1,39 @@
-#ifndef AXIS_ALIGNED_PRISM_H
-#define AXIS_ALIGNED_PRISM_H
+#ifndef AXIS_ALIGNED_BOX_H
+#define AXIS_ALIGNED_BOX_H
+
+#include <memory>
 
 #include "../../Utilities/Vector3.h"
 
-class AxisAlignedPrism {
+class Geometry;
+
+class AxisAlignedBox {
 private:
     Vector3 minCorner;
     Vector3 maxCorner;
+    std::deque<Geometry*> contents;
+    std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>> children{nullptr, nullptr};
+
+    std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>> split() const;
 
 public:
-    AxisAlignedPrism() : minCorner(Vector3(0, 0, 0)), maxCorner(Vector3(0, 0, 0)) {}
+    AxisAlignedBox() : minCorner(Vector3(0, 0, 0)), maxCorner(Vector3(0, 0, 0)), contents() {}
 
-    AxisAlignedPrism(const Vector3& minCorner, const Vector3& maxCorner) :
+    AxisAlignedBox(const Vector3& minCorner, const Vector3& maxCorner) :
         minCorner(minCorner), maxCorner(maxCorner) {}
+
+    AxisAlignedBox(const Vector3& minCorner, const Vector3& maxCorner, const std::deque<Geometry*>& contents) :
+        minCorner(minCorner), maxCorner(maxCorner), contents(contents) {}
+
+    void recursiveSubdivide(uint subdivLimit, const uint contentsLimit);
+
+    const std::deque<Geometry*>& getContents() const {
+        return contents;
+    }
+
+    const std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>>& getChildren() const {
+        return children;
+    }
 
     const Vector3& getMinCorner() const {
         return minCorner;
@@ -79,4 +100,4 @@ public:
     }
 };
 
-#endif // AXIS_ALIGNED_PRISM_H
+#endif // AXIS_ALIGNED_BOX_H

@@ -33,7 +33,7 @@ public:
         minClippingDistance(std::max(minClippingDistance, MIN_CLIPPING_DISTANCE)),
         maxClippingDistance(maxClippingDistance) {}
 
-    void render(const Scene& scene, Image& image) const {
+    void render(Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
         Vector3 rayVector = Vector3::normalize(camera.getRotation());
 

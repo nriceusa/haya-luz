@@ -3,6 +3,9 @@
 
 #define MIN_DIVISION 0.001
 
+#include <limits>
+#include <deque>
+
 #include "../Scene.h"
 #include "../SceneComponents/Geometry/Sphere.h"
 #include "../Utilities/Utilities.h"
@@ -12,10 +15,35 @@ class Ray {
 private:
     const Vector3 origin;
     const Vector3 direction;
-    const Scene& scene;
+    Scene& scene;
 
     const double minClippingDistance;
     const double maxClippingDistance;
+
+    double hitBoundingBox(const AxisAlignedBox& box) const {
+        const double tMinX = (box.getMinX() - origin.getX()) / direction.getX();
+        const double tMaxX = (box.getMaxX() - origin.getX()) / direction.getX();
+        const double tMinY = (box.getMinY() - origin.getY()) / direction.getY();
+        const double tMaxY = (box.getMaxY() - origin.getY()) / direction.getY();
+        const double tMinZ = (box.getMinZ() - origin.getZ()) / direction.getZ();
+        const double tMaxZ = (box.getMaxZ() - origin.getZ()) / direction.getZ();
+
+        const double tNearX = std::min(tMinX, tMaxX);
+        const double tFarX = std::max(tMinX, tMaxX);
+        const double tNearY = std::min(tMinY, tMaxY);
+        const double tFarY = std::max(tMinY, tMaxY);
+        const double tNearZ = std::min(tMinZ, tMaxZ);
+        const double tFarZ = std::max(tMinZ, tMaxZ);
+
+        const double tNear = std::max({tNearX, tNearY, tNearZ});
+        const double tFar = std::min({tFarX, tFarY, tFarZ});
+
+        if (tNear > tFar || tFar < 0) {
+            return -1;
+        } else {
+            return tNear;
+        }
+    }
 
     double hitSphere(const Sphere& sphere) const {
         Vector3 oc = origin - sphere.getCenter();
@@ -59,7 +87,7 @@ private:
         }
     }
 
-    double hit(const Geometry& geometry) const {
+    double hitGeo(const Geometry& geometry) const {
         if (const Sphere* sphere = dynamic_cast<const Sphere*>(&geometry)) {
             return hitSphere(*sphere);
         } else if (const Triangle* triangle = dynamic_cast<const Triangle*>(&geometry)) {
@@ -77,7 +105,7 @@ private:
     }
 
 public:
-    Ray(const Vector3& origin, const Vector3& direction, const Scene& scene, double minClippingDistance, double maxClippingDistance) :
+    Ray(const Vector3& origin, const Vector3& direction, Scene& scene, double minClippingDistance, double maxClippingDistance) :
         origin(origin),
         direction(direction),
         scene(scene),
@@ -100,16 +128,42 @@ public:
         double lowestDistance = maxClippingDistance;
         const Geometry* closestGeometry = nullptr;
 
-        for (const Geometry* geo : scene.getGeometries()) {
-            const Geometry& geometry = *geo;
+        std::deque<const AxisAlignedBox*> stack;
+        stack.push_back(&scene.getBoundingVolume());
+        while (!stack.empty()) {
+            const AxisAlignedBox& box = *stack.back();
+            stack.pop_back();
 
-            const double distance = this->hit(geometry);
-            if (distance < lowestDistance && distance > minClippingDistance) {
-                lowestDistance = distance;
-                const Vector3 intersection = this->at(distance);
-                closestGeometry = &geometry;
+            const double boxT = hitBoundingBox(box);
+            if (boxT < 0 || lowestDistance <= boxT) {
+                continue;
+            }
+
+            const auto& children = box.getChildren();
+            if (children.first == nullptr && children.second == nullptr) {
+                for (const Geometry* geo : box.getContents()) {
+                    const double geoT = hitGeo(*geo);
+                    if (minClippingDistance < geoT && geoT < lowestDistance) {
+                        lowestDistance = geoT;
+                        closestGeometry = geo;
+                    }
+                }
+            } else {
+                stack.push_back(children.first.get());
+                stack.push_back(children.second.get());
             }
         }
+
+        // for (const Geometry* geo : scene.getGeometries()) {
+        //     const Geometry& geometry = *geo;
+
+        //     const double distance = this->hitGeo(geometry);
+        //     if (distance < lowestDistance && distance > minClippingDistance) {
+        //         lowestDistance = distance;
+        //         const Vector3 intersection = this->at(distance);
+        //         closestGeometry = &geometry;
+        //     }
+        // }
         
         if (closestGeometry != nullptr) {
             const Vector3 intersection = this->at(lowestDistance);
@@ -176,7 +230,13 @@ public:
                     material.getSpecularRoughness()
                 );
                 
-                const Ray refractionRay(intersect - (normalVector * minClippingDistance), refractionDirection, scene, minClippingDistance, maxClippingDistance);
+                const Ray refractionRay(
+                    intersect - (normalVector * minClippingDistance),
+                    refractionDirection,
+                    scene,
+                    minClippingDistance,
+                    maxClippingDistance
+                );
                 const Vector3 refractedColor = refractionRay.trace(numRecursions - 1);
 
                 surfaceRGB += material.getTransmission() * refractedColor;
@@ -189,11 +249,17 @@ public:
 
             // Compute shadows
             bool inShadow = false;
-            const Ray shadowRay(intersect + (vectorToLight * minClippingDistance), lightOffset, scene, minClippingDistance, maxClippingDistance);
+            const Ray shadowRay(
+                intersect + (vectorToLight * minClippingDistance),
+                lightOffset,
+                scene,
+                minClippingDistance,
+                maxClippingDistance
+            );
             for (const Geometry* geo : scene.getGeometries()) {
                 const Geometry& geometry = *geo;
 
-                const double t = shadowRay.hit(geometry);
+                const double t = shadowRay.hitGeo(geometry);
                 if (t > 0 && t < 1) {
                     inShadow = true;
                     break;

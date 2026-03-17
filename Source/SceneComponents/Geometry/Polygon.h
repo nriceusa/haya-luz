@@ -11,7 +11,7 @@ private:
     std::vector<Vector3> points;
     Vector3 normal;
 
-    AxisAlignedPrism computeBoundingVolume() override {
+    AxisAlignedBox computeBoundingVolume() override {
         Vector3 minCorner = points[0];
         Vector3 maxCorner = points[0];
         for (const Vector3& point : points) {
@@ -22,7 +22,7 @@ private:
             if (point.getY() > maxCorner.getY()) maxCorner.setY(point.getY());
             if (point.getZ() > maxCorner.getZ()) maxCorner.setZ(point.getZ());
         }
-        return AxisAlignedPrism{minCorner, maxCorner};
+        return AxisAlignedBox{minCorner, maxCorner};
     }
 
 public:
@@ -74,8 +74,8 @@ public:
     std::vector<Triangle> generateTriangles() const {
         std::vector<Triangle> triangles;
         for (uint i = 1; i < points.size() - 1; ++i) {
-            const Triangle triangle(this->material, points[0], points[i], points[i + 1]);
-            triangles.push_back(triangle);
+            Triangle triangle(this->material, points[0], points[i], points[i + 1]);
+            triangles.push_back(std::move(triangle));
         }
         return triangles;
     }
