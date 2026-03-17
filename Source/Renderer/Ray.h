@@ -41,7 +41,7 @@ private:
         if (tNear > tFar || tFar < 0) {
             return -1;
         } else {
-            return tNear;
+            return std::max(0.0, tNear);
         }
     }
 
@@ -153,17 +153,6 @@ public:
                 stack.push_back(children.second.get());
             }
         }
-
-        // for (const Geometry* geo : scene.getGeometries()) {
-        //     const Geometry& geometry = *geo;
-
-        //     const double distance = this->hitGeo(geometry);
-        //     if (distance < lowestDistance && distance > minClippingDistance) {
-        //         lowestDistance = distance;
-        //         const Vector3 intersection = this->at(distance);
-        //         closestGeometry = &geometry;
-        //     }
-        // }
         
         if (closestGeometry != nullptr) {
             const Vector3 intersection = this->at(lowestDistance);

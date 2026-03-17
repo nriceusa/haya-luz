@@ -63,7 +63,7 @@ std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>> Axis
             }
         }
         return std::make_pair(
-            std::unique_ptr<AxisAlignedBox>(new AxisAlignedBox(getMinCorner(), Vector3(getMinX(), getMinY(), midZ), backContents)),
+            std::unique_ptr<AxisAlignedBox>(new AxisAlignedBox(getMinCorner(), Vector3(getMaxX(), getMaxY(), midZ), backContents)),
             std::unique_ptr<AxisAlignedBox>(new AxisAlignedBox(Vector3(getMinX(), getMinY(), midZ), getMaxCorner(), frontContents))
         );
     }
