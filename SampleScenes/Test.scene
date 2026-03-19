@@ -1,11 +1,11 @@
-#  R G B  Scale
-SKY  0 0 0.2  2
+#       R G B       Scale
+SKY     0 0 0.2     2
 
-#  OriginX  OriginY  OriginZ  TargetX TargetY TargetZ  FOV
-CAMERA  0 1.5 3  0 0.5 0  45
+#       OriginX OriginY OriginZ     TargetX TargetY TargetZ     FOV
+CAMERA  0 1.5 3                     0 0.5 0                     45
 
 #                   Dx Dy Dz    R G B   Scale
-#DIRECTIONAL_LIGHT   -1 -1 -1    1 1 1   1
+#DIRECTIONAL_LIGHT  -1 -1 -1    1 1 1   1
 
 #           X Y Z       R G B   Scale
 #POINT_LIGHT -3 -3 2     1 1 1   2
@@ -13,12 +13,15 @@ CAMERA  0 1.5 3  0 0.5 0  45
 #           X Y Z       Dx Dy Dz    W   H   R G B   Scale
 AREA_LIGHT  10 1 -5     -10 -0.2 5  1   1   1 1 1   15
 
-#           MatID   Dr Dg Db        Sr Sg Sb    Er Eg Eb    Diffuse Specular Roughness  Emissivity Transmission IOR
-MATERIAL    1       0.8 0.1 0.1     1 1 1       1 1 1       1 0.1 0.25                  0.1 1 1.2
-MATERIAL    2       0.1 0.8 0.1     1 1 1       1 1 1       1 0.9 0.25                  0.1 0 0
-MATERIAL    3       0.8 0.8 0.1     1 1 1       1 1 1       1 0.1 0                     0.1 0 0
-MATERIAL    4       0.1 0.8 0.8     1 1 1       1 1 1       1 0.1 0.25                  0.1 0 0
-MATERIAL    5       0.8 0.1 0.1     1 1 1       1 1 1       1 0.1 0.5                   0.1 0 0
+#       TexID   Xres Yres   Path
+TEXTURE 1       1024 1024   SampleScenes/Checkerboard.png
+
+#           MatID   Dr Dg Db        Sr Sg Sb    Er Eg Eb    Diffuse Specular Roughness  Emissivity Transmission IOR     TexID
+MATERIAL    1       0.8 0.1 0.1     1 1 1       1 1 1       1 0.1 0.25                  0.1 1 1.2                       0
+MATERIAL    2       0.1 0.8 0.1     1 1 1       1 1 1       1 0.9 0.25                  0.1 0 0                         1
+MATERIAL    3       0.8 0.8 0.1     1 1 1       1 1 1       1 0.1 0                     0.1 0 0                         0
+MATERIAL    4       0.1 0.8 0.8     1 1 1       1 1 1       1 0.1 0.25                  0.1 0 0                         0
+MATERIAL    5       0.8 0.1 0.1     1 1 1       1 1 1       1 0.1 0.5                   0.1 0 0                         0
 
 #       MatID   X Y Z               Radius
 SPHERE  1       0 0.5 0             0.5

@@ -33,6 +33,12 @@ private:
         return value;
     }
 
+    static std::string readString(std::istringstream& lineStream) {
+        std::string value;
+        lineStream >> value;
+        return value;
+    }
+
     static Vector3 readVector3(std::istringstream& lineStream) {
         double x, y, z;
         lineStream >> x >> y >> z;
@@ -90,8 +96,17 @@ public:
 
                 scene.addLight(AreaLight(intensityScalar, intensity, location, rotation, width, height));
 
+            } else if (type == "TEXTURE") {
+                const uint texId = readUint(lineStream);
+                const uint xRes = readUint(lineStream);
+                const uint yRes = readUint(lineStream);
+                const std::string path = readString(lineStream);
+
+                Image texture(xRes, yRes, path);
+                scene.addTexture(texture);
+
             } else if (type == "MATERIAL") {
-                const uint id = readUint(lineStream);
+                const uint matId = readUint(lineStream);
 
                 const Vector3 diffuseIntensity = readVector3(lineStream);
                 const Vector3 specularIntensity = readVector3(lineStream);
@@ -103,9 +118,22 @@ public:
                 const double transmission = readDouble(lineStream);
                 const double refractionIndex = readDouble(lineStream);
 
-                Material material(diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
-                                  specular, specularRoughness, emissivity, transmission, refractionIndex);
-                scene.addMaterial(material);
+                const uint texId = readUint(lineStream);
+
+                if (texId == 0) {
+                    Material material(
+                        diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
+                        specular, specularRoughness, emissivity, transmission, refractionIndex
+                    );
+                    scene.addMaterial(material);
+                } else {
+                    Material material(
+                        diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
+                        specular, specularRoughness, emissivity, transmission, refractionIndex,
+                        &scene.getTexture(texId - 1)
+                    );
+                    scene.addMaterial(material);
+                }
 
             } else if (type == "SPHERE") {
                 const uint materialId = readUint(lineStream);

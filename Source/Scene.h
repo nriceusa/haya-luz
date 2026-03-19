@@ -64,6 +64,7 @@ private:
     std::deque<Triangle> triangles;
 
     std::deque<Material> materials;
+    std::deque<Image> textures;
 
 public:
     Scene() : volumeSubdivLimit(20), volumeContentsLimit(3) {};
@@ -212,6 +213,18 @@ public:
         materials.push_back(material);
     }
 
+    const Image& getTexture(const uint index) const {
+        return textures[index];
+    }
+
+    const std::deque<Image>& getTextures() const {
+        return textures;
+    }
+
+    void addTexture(Image& texture) {
+        textures.push_back(texture);
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Scene& scene) {
         os << "# Scene" << std::endl;
         os << scene.getSky() << std::endl;
@@ -229,6 +242,9 @@ public:
         for (const Geometry* geometry : scene.getGeometries()) {
             os << *geometry << std::endl;
         }
+        os << "# Number of Textures" << std::endl;
+        os << scene.getTextures().size() << std::endl;
+        
         return os;
     }
 };

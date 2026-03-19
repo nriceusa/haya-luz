@@ -1,6 +1,7 @@
 #ifndef HAYA_LUZ_MATERIAL_H
 #define HAYA_LUZ_MATERIAL_H
 
+#include "../../Image/Image.h"
 #include "../../Utilities/Vector3.h"
 
 class Material {
@@ -14,34 +15,41 @@ private:
     double emissivity;
     double transmission;
     double refractionIndex;
+    const Image* texture;
 
 public:
-    Material() :
-        diffuseIntensity(Vector3(0.5, 0.5, 0.5)),
-        specularIntensity(Vector3(0.5, 0.5, 0.5)),
-        emissionIntensity(Vector3(0.1, 0.1, 0.1)),
-        diffuse(0.5),
-        specular(0.5),
-        specularRoughness(0.5),
-        emissivity(0.1),
-        transmission(0),
-        refractionIndex(1) {}
+    Material() : Material(
+        Vector3(0.5, 0.5, 0.5), Vector3(0.5, 0.5, 0.5), Vector3(0.1, 0.1, 0.1),
+        0.5, 0.5, 0.5, 0.1, 0.0, 1.0, nullptr
+    ) {}
     
-    Material(const Vector3& diffuseIntensity, const Vector3& specularIntensity, const Vector3& emissionIntensity,
-             const double diffuse, const double specular, const double specularRoughness, const double emissivity) :
-        diffuseIntensity(diffuseIntensity),
-        specularIntensity(specularIntensity),
-        emissionIntensity(Vector3(0, 0, 0)),
-        diffuse(diffuse),
-        specular(specular),
-        specularRoughness(specularRoughness),
-        emissivity(emissivity),
-        transmission(0),
-        refractionIndex(1) {}
+    Material(
+        const Vector3& diffuseIntensity, const Vector3& specularIntensity,
+        const Vector3& emissionIntensity, const double diffuse, const double specular,
+        const double specularRoughness, const double emissivity
+    ) : Material(
+        diffuseIntensity, specularIntensity, emissionIntensity, diffuse, specular,
+        specularRoughness, emissivity,
+        0.0, 1.0, nullptr
+    ) {}
     
-    Material(const Vector3& diffuseIntensity, const Vector3& specularIntensity, const Vector3& emissionIntensity,
-             const double diffuse, const double specular, const double specularRoughness, const double emissivity,
-             const double transmission, const double refractionIndex) :
+    Material(
+        const Vector3& diffuseIntensity, const Vector3& specularIntensity,
+        const Vector3& emissionIntensity, const double diffuse, const double specular,
+        const double specularRoughness, const double emissivity,
+        const double transmission, const double refractionIndex
+    ) : Material(
+        diffuseIntensity, specularIntensity, emissionIntensity, diffuse, specular,
+        specularRoughness, emissivity, transmission, refractionIndex,
+        nullptr
+    ) {}
+    
+    Material(
+        const Vector3& diffuseIntensity, const Vector3& specularIntensity,
+        const Vector3& emissionIntensity, const double diffuse, const double specular,
+        const double specularRoughness, const double emissivity, const double transmission,
+        const double refractionIndex, const Image* texture
+    ) :
         diffuseIntensity(diffuseIntensity),
         specularIntensity(specularIntensity),
         emissionIntensity(emissionIntensity),
@@ -50,7 +58,8 @@ public:
         specularRoughness(specularRoughness),
         emissivity(emissivity),
         transmission(transmission),
-        refractionIndex(refractionIndex) {}
+        refractionIndex(refractionIndex),
+        texture(texture) {}
     
     const Vector3& getDiffuseIntensity() const {
         return diffuseIntensity;
@@ -86,6 +95,10 @@ public:
 
     double getRefractionIndex() const {
         return refractionIndex;
+    }
+
+    const Image& getTexture() const {
+        return *texture;
     }
 
     void setDiffuseIntensity(const Vector3& newDiffuseIntensity) {
@@ -131,7 +144,6 @@ public:
            << "    emissivity: " << material.getEmissivity() << std::endl
            << "    transmission: " << material.getTransmission() << std::endl
            << "    refractionIndex: " << material.getRefractionIndex() << std::endl;
-        
         return os;
     }
 };

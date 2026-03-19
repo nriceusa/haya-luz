@@ -13,10 +13,16 @@
 class Image {
 private:
     std::vector<std::vector<Pixel>> pixels;
+    std::string path;
 
 public:
-    Image() : pixels(DEFAULT_WIDTH, std::vector<Pixel>(DEFAULT_HEIGHT)) {}
-    Image(const uint width, const uint height) : pixels(width, std::vector<Pixel>(height)) {}
+    Image() : Image(DEFAULT_WIDTH, DEFAULT_HEIGHT, "") {}
+
+    Image(const uint width, const uint height) : Image(width, height, "") {}
+
+    Image(const uint width, const uint height, const std::string& path) :
+        pixels(width, std::vector<Pixel>(height)), path(path) {}
+    
 
     uint getWidth() const {
         return pixels.size();

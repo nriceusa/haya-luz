@@ -104,6 +104,34 @@ private:
         return -1;
     }
 
+    bool traceShadow() const {
+        std::deque<const AxisAlignedBox*> stack;
+        stack.push_back(&scene.getBoundingVolume());
+        while (!stack.empty()) {
+            const AxisAlignedBox& box = *stack.back();
+            stack.pop_back();
+
+            const double boxT = hitBoundingBox(box);
+            if (boxT < 0 || maxClippingDistance <= boxT) {
+                continue;
+            }
+
+            const auto& children = box.getChildren();
+            if (children.first == nullptr && children.second == nullptr) {
+                for (const Geometry* geo : box.getContents()) {
+                    const double geoT = hitGeo(*geo);
+                    if (minClippingDistance < geoT && geoT < maxClippingDistance) {
+                        return true;
+                    }
+                }
+            } else {
+                stack.push_back(children.first.get());
+                stack.push_back(children.second.get());
+            }
+        }
+        return false;
+    }
+
 public:
     Ray(const Vector3& origin, const Vector3& direction, Scene& scene, double minClippingDistance, double maxClippingDistance) :
         origin(origin),
@@ -237,7 +265,6 @@ public:
             const Vector3 vectorToLight = Vector3::normalize(lightOffset);
 
             // Compute shadows
-            bool inShadow = false;
             const Ray shadowRay(
                 intersect + (vectorToLight * minClippingDistance),
                 lightOffset,
@@ -245,15 +272,19 @@ public:
                 minClippingDistance,
                 maxClippingDistance
             );
-            for (const Geometry* geo : scene.getGeometries()) {
-                const Geometry& geometry = *geo;
 
-                const double t = shadowRay.hitGeo(geometry);
-                if (t > 0 && t < 1) {
-                    inShadow = true;
-                    break;
-                }
-            }
+            // bool inShadow = false;
+            // for (const Geometry* geo : scene.getGeometries()) {
+            //     const Geometry& geometry = *geo;
+
+            //     const double t = shadowRay.hitGeo(geometry);
+            //     if (t > 0 && t < 1) {
+            //         inShadow = true;
+            //         break;
+            //     }
+            // }
+            const bool inShadow = shadowRay.traceShadow();
+
             if (inShadow) {
                 continue;
             }
