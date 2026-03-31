@@ -19,6 +19,9 @@ protected:
 
     Geometry(const Material& material, const Vector3& location) :
         SceneComponent(location), material(material) {}
+
+    Geometry(const Material& material, const Vector3& location, const Vector3& rotation) :
+        SceneComponent(location, rotation), material(material) {}
     
     Geometry(
         const Material& material,

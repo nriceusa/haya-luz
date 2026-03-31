@@ -6,20 +6,31 @@
 class Sphere : public Geometry {
 private:
     double radius;
+    Vector3 upAxis;
+    Vector3 rightAxis;
 
     AxisAlignedBox computeBoundingVolume() override {
         Vector3 center = this->getLocation();
-        Vector3 minCorner = Vector3(center.getX() - radius, center.getY() - radius, center.getZ() - radius);
-        Vector3 maxCorner = Vector3(center.getX() + radius, center.getY() + radius, center.getZ() + radius);
+        Vector3 minCorner = Vector3(
+            center.getX() - radius,
+            center.getY() - radius,
+            center.getZ() - radius
+        );
+        Vector3 maxCorner = Vector3(
+            center.getX() + radius,
+            center.getY() + radius,
+            center.getZ() + radius
+        );
         return AxisAlignedBox{minCorner, maxCorner};
     }
 
 public:
     Sphere(Material& material, const Vector3& center) :
-        Geometry(material, center), radius(1) {}
+        Sphere(material, center, 1) {}
 
     Sphere(Material& material, const Vector3& center, double radius) :
-        Geometry(material, center), radius(radius) {}
+        Geometry(material, center), radius(radius),
+        upAxis(Vector3(0, 1, 0)), rightAxis(Vector3(1, 0, 0)) {}
 
     const Vector3& getCenter() const {
         return this->getLocation();
@@ -33,6 +44,13 @@ public:
         radius = newRadius;
     }
 
+    void transform(const Vector3& translation, const Vector3& rotationAxis, const double angle) override {
+        SceneComponent::transform(translation, rotationAxis, angle);
+
+        upAxis = Vector3::normalize(Vector3::rotate(upAxis, rotationAxis, angle));
+        rightAxis = Vector3::normalize(Vector3::rotate(rightAxis, rotationAxis, angle));
+    }
+
     const Vector3 getNormalAt(const Vector3& point) const override {
         return (point - this->getLocation()) / radius;
     }
@@ -40,8 +58,13 @@ public:
     const Vector2 getUV(const Vector3& point) const override {
         const Vector3 normal = getNormalAt(point);
 
-        const double phi = atan2(normal.getZ(), normal.getX());
-        const double theta = asin(normal.getY());
+        const Vector3 forwardAxis = Vector3::normalize(Vector3::cross(upAxis, rightAxis));
+        const double localX = Vector3::dot(normal, rightAxis);
+        const double localY = Vector3::dot(normal, upAxis);
+        const double localZ = Vector3::dot(normal, forwardAxis);
+
+        const double phi = atan2(localZ, localX);
+        const double theta = acos(localY);
 
         const double u = 0.5 + (phi / (2 * M_PI));
         const double v = theta / M_PI;
