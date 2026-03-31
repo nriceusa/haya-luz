@@ -9,6 +9,7 @@
 class Polygon: public Geometry {
 private:
     std::vector<Vector3> points;
+    std::vector<Vector2> uvs;
     Vector3 normal;
 
     AxisAlignedBox computeBoundingVolume() override {
@@ -26,8 +27,9 @@ private:
     }
 
 public:
-    Polygon(Material& material, std::vector<Vector3>& points) :
+    Polygon(Material& material, std::vector<Vector3>& points, std::vector<Vector2>& uvs) :
         points(points),
+        uvs(uvs),
         Geometry(material, points[0])
     {
         Vector3 location;
@@ -62,6 +64,30 @@ public:
     const Vector3 getNormalAt(const Vector3& point) const override {
         return getNormal();
     }
+
+    std::vector<Triangle> generateTriangles() const {
+        std::vector<Triangle> triangles;
+        for (uint i = 1; i < points.size() - 1; ++i) {
+            Triangle triangle(
+                this->material,
+                points[0], points[i], points[i + 1],
+                uvs[0], uvs[i], uvs[i + 1]
+            );
+            triangles.push_back(std::move(triangle));
+        }
+        return triangles;
+    }
+
+    const Vector2 getUV(const Vector3& point) const override {
+        const std::vector<Triangle> triangles = generateTriangles();
+        for (const Triangle& triangle : triangles) {
+            const Vector3 coords = triangle.getBarycentricCoords(point);
+            if (coords.getX() >= 0 && coords.getY() >= 0 && coords.getZ() >= 0) {
+                return triangle.getUV(point);
+            }
+        }
+        return Vector2(0, 0);
+    }
     
     void transform(const Vector3& translation, const Vector3& rotationAxis, const double angle) override {
         SceneComponent::transform(translation, rotationAxis, angle);
@@ -69,15 +95,6 @@ public:
             point = Vector3::rotate(point + translation, rotationAxis, angle);
         }
         normal = Vector3::normalize(Vector3::rotate(normal, rotationAxis, angle));
-    }
-
-    std::vector<Triangle> generateTriangles() const {
-        std::vector<Triangle> triangles;
-        for (uint i = 1; i < points.size() - 1; ++i) {
-            Triangle triangle(this->material, points[0], points[i], points[i + 1]);
-            triangles.push_back(std::move(triangle));
-        }
-        return triangles;
     }
 
     void print(std::ostream& os) const override {

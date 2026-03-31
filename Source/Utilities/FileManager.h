@@ -39,6 +39,12 @@ private:
         return value;
     }
 
+    static Vector2 readVector2(std::istringstream& lineStream) {
+        double x, y;
+        lineStream >> x >> y;
+        return Vector2(x, y);
+    }
+
     static Vector3 readVector3(std::istringstream& lineStream) {
         double x, y, z;
         lineStream >> x >> y >> z;
@@ -103,7 +109,7 @@ public:
                 const std::string path = readString(lineStream);
 
                 Image texture(xRes, yRes, path);
-                scene.addTexture(texture);
+                scene.addTexture(texId, texture);
 
             } else if (type == "MATERIAL") {
                 const uint matId = readUint(lineStream);
@@ -125,42 +131,47 @@ public:
                         diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
                         specular, specularRoughness, emissivity, transmission, refractionIndex
                     );
-                    scene.addMaterial(material);
+                    scene.addMaterial(matId, material);
                 } else {
                     Material material(
                         diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
                         specular, specularRoughness, emissivity, transmission, refractionIndex,
-                        &scene.getTexture(texId - 1)
+                        &scene.getTexture(texId)
                     );
-                    scene.addMaterial(material);
+                    scene.addMaterial(matId, material);
                 }
 
             } else if (type == "SPHERE") {
-                const uint materialId = readUint(lineStream);
+                const uint matId = readUint(lineStream);
                 const Vector3 center = readVector3(lineStream);
                 const double radius = readDouble(lineStream);
 
-                Sphere sphere(scene.getMaterial(materialId - 1), center, radius);
+                Sphere sphere(scene.getMaterial(matId), center, radius);
                 scene.addGeometry(sphere);
                 
             } else if (type == "TRIANGLE") {
-                const uint materialId = readUint(lineStream);
+                const uint matId = readUint(lineStream);
                 Vector3 point1 = readVector3(lineStream);
                 Vector3 point2 = readVector3(lineStream);
                 Vector3 point3 = readVector3(lineStream);
 
-                Triangle triangle(scene.getMaterial(materialId - 1), point1, point2, point3);
+                Triangle triangle(scene.getMaterial(matId), point1, point2, point3);
                 scene.addGeometry(triangle);
 
             } else if (type == "POLYGON") {
-                const uint materialId = readUint(lineStream);
+                const uint matId = readUint(lineStream);
                 const uint numVertices = readUint(lineStream);
                 std::vector<Vector3> points;
                 for (uint i = 0; i < numVertices; ++i) {
                     points.push_back(readVector3(lineStream));
                 }
 
-                Polygon polygon(scene.getMaterial(materialId - 1), points);
+                std::vector<Vector2> uvs;
+                for (uint i = 0; i < numVertices; ++i) {
+                    uvs.push_back(readVector2(lineStream));
+                }
+
+                Polygon polygon(scene.getMaterial(matId), points, uvs);
                 scene.addGeometry(polygon);
                 
             } else {

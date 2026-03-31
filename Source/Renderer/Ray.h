@@ -9,6 +9,7 @@
 #include "../Scene.h"
 #include "../SceneComponents/Geometry/Sphere.h"
 #include "../Utilities/Utilities.h"
+#include "../Utilities/Vector2.h"
 #include "../Utilities/Vector3.h"
 
 class Ray {
@@ -184,17 +185,23 @@ public:
         
         if (closestGeometry != nullptr) {
             const Vector3 intersection = this->at(lowestDistance);
-            return this->computeSurface(numRecursions, intersection,
-                closestGeometry->getNormalAt(intersection), closestGeometry->getMaterial());
+            const Vector2 uv = closestGeometry->getUV(intersection);
+            return this->computeSurface(
+                numRecursions, intersection, closestGeometry->getNormalAt(intersection),
+                uv, closestGeometry->getMaterial()
+            );
         }
         return scene.getSky().getAmbientLight();
     }
 
-    const Vector3 computeSurface(const uint numRecursions, const Vector3& intersect, const Vector3& normal,
-                                 const Material& material) const {
+    const Vector3 computeSurface(
+        const uint numRecursions, const Vector3& intersect, const Vector3& normal,
+        const Vector2 uv, const Material& material
+    ) const {
         if (numRecursions <= 0) {
             return {0, 0, 0};
         }
+
         const Vector3 rayVector = Vector3::normalize(origin - intersect);
         const Vector3 rayDirection = Vector3::normalize(direction);
         
@@ -273,16 +280,6 @@ public:
                 maxClippingDistance
             );
 
-            // bool inShadow = false;
-            // for (const Geometry* geo : scene.getGeometries()) {
-            //     const Geometry& geometry = *geo;
-
-            //     const double t = shadowRay.hitGeo(geometry);
-            //     if (t > 0 && t < 1) {
-            //         inShadow = true;
-            //         break;
-            //     }
-            // }
             const bool inShadow = shadowRay.traceShadow();
 
             if (inShadow) {
@@ -295,7 +292,7 @@ public:
                 angleToLight = 0;
             }
             const Vector3 diffuse = material.getDiffuse() * light->computeIlluminationAt(intersect) * 
-                material.getDiffuseIntensity() * angleToLight * (1 - material.getTransmission());
+                material.getDiffuseIntensity(uv.getU(), uv.getV()) * angleToLight * (1 - material.getTransmission());
 
             // Compute specular highlight
             const Vector3 r = 2 * normalVector * Vector3::dot(normalVector, vectorToLight) - vectorToLight;

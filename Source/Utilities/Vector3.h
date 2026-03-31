@@ -1,4 +1,3 @@
-
 #ifndef HAYA_LUZ_VECTOR3_H
 #define HAYA_LUZ_VECTOR3_H
 
@@ -141,7 +140,7 @@ public:
     }
 
     friend Vector3 operator/(const Vector3& vector, const double dividend) {
-        return 1 / dividend * vector;
+        return (1 / dividend) * vector;
     }
 
     static double dot(const Vector3& vectorLeft, const Vector3& vectorRight) {

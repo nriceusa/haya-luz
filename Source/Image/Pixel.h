@@ -11,6 +11,14 @@ private:
 public:
     Pixel() : color(Color(0, 0, 0)) {}
     Pixel(const Color& color) : color(color) {}
+
+    const Color& getColor() const {
+        return color;
+    }
+
+    const Vector3 getRGB() const {
+        return Vector3(color.getR(), color.getG(), color.getB()) * color.getAlpha();
+    }
     
     double getR() const {
         return color.getR();

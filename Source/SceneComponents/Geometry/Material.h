@@ -15,7 +15,7 @@ private:
     double emissivity;
     double transmission;
     double refractionIndex;
-    const Image* texture;
+    const Image* diffuseTexture;
 
 public:
     Material() : Material(
@@ -48,7 +48,7 @@ public:
         const Vector3& diffuseIntensity, const Vector3& specularIntensity,
         const Vector3& emissionIntensity, const double diffuse, const double specular,
         const double specularRoughness, const double emissivity, const double transmission,
-        const double refractionIndex, const Image* texture
+        const double refractionIndex, const Image* diffuseTexture
     ) :
         diffuseIntensity(diffuseIntensity),
         specularIntensity(specularIntensity),
@@ -59,10 +59,14 @@ public:
         emissivity(emissivity),
         transmission(transmission),
         refractionIndex(refractionIndex),
-        texture(texture) {}
+        diffuseTexture(diffuseTexture) {}
     
-    const Vector3& getDiffuseIntensity() const {
-        return diffuseIntensity;
+    const Vector3 getDiffuseIntensity(const double u = 0.0, const double v = 0.0) const {
+        if (diffuseTexture != nullptr) {
+            return diffuseTexture->sample(u, v);
+        } else {
+            return diffuseIntensity;
+        }
     }
 
     const Vector3& getSpecularIntensity() const {
@@ -98,7 +102,7 @@ public:
     }
 
     const Image& getTexture() const {
-        return *texture;
+        return *diffuseTexture;
     }
 
     void setDiffuseIntensity(const Vector3& newDiffuseIntensity) {

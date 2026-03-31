@@ -37,6 +37,18 @@ public:
         return (point - this->getLocation()) / radius;
     }
 
+    const Vector2 getUV(const Vector3& point) const override {
+        const Vector3 normal = getNormalAt(point);
+
+        const double phi = atan2(normal.getZ(), normal.getX());
+        const double theta = asin(normal.getY());
+
+        const double u = 0.5 + (phi / (2 * M_PI));
+        const double v = theta / M_PI;
+
+        return Vector2(u, v);
+    }
+
     void print(std::ostream& os) const override {
         os << "## Sphere" << std::endl;
         os << "center: " << this->getLocation() << std::endl;

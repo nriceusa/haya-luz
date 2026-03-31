@@ -5,13 +5,13 @@ SKY     0 0 0.2     2
 CAMERA  0 1.5 3                     0 0.5 0                     45
 
 #                   Dx Dy Dz    R G B   Scale
-#DIRECTIONAL_LIGHT  -1 -1 -1    1 1 1   1
+DIRECTIONAL_LIGHT  -1 -1 -1    1 1 1   1
 
 #           X Y Z       R G B   Scale
-#POINT_LIGHT -3 -3 2     1 1 1   2
+POINT_LIGHT -3 -3 2     1 1 1   2
 
 #           X Y Z       Dx Dy Dz    W   H   R G B   Scale
-AREA_LIGHT  10 1 -5     -10 -0.2 5  1   1   1 1 1   15
+#AREA_LIGHT  10 1 -5     -10 -0.2 5  1   1   1 1 1   15
 
 #       TexID   Xres Yres   Path
 TEXTURE 1       1024 1024   SampleScenes/Checkerboard.png
@@ -29,5 +29,5 @@ SPHERE  3       -0.85 0.5 -0.85     0.5
 SPHERE  4       0.85 0.5 -0.85      0.5
 SPHERE  5       0 0.5 -1.5          0.5
 
-#       MatID   Num     X Y Z ... X Y Z
-POLYGON 2       4       -1 0 0  0 0 -1  1 0 0  0 0 1
+#       MatID   Num     X Y Z ... X Y Z                 U V ... U V
+POLYGON 2       4       -1 0 0  0 0 -1  1 0 0  0 0 1    0 0  1 0  1 1  0 1

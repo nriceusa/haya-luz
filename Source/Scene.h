@@ -63,8 +63,8 @@ private:
     std::deque<Sphere> spheres;
     std::deque<Triangle> triangles;
 
-    std::deque<Material> materials;
-    std::deque<Image> textures;
+    std::unordered_map<uint, Material> materials;
+    std::unordered_map<uint, Image> textures;
 
 public:
     Scene() : volumeSubdivLimit(20), volumeContentsLimit(3) {};
@@ -202,27 +202,27 @@ public:
     }
 
     Material& getMaterial(const uint index) {
-        return materials[index];
+        return materials.at(index);
     }
 
-    const std::deque<Material>& getMaterials() const {
+    const std::unordered_map<uint, Material>& getMaterials() const {
         return materials;
     }
 
-    void addMaterial(Material& material) {
-        materials.push_back(material);
+    void addMaterial(uint id, Material& material) {
+        materials[id] = material;
     }
 
     const Image& getTexture(const uint index) const {
-        return textures[index];
+        return textures.at(index);
     }
 
-    const std::deque<Image>& getTextures() const {
+    const std::unordered_map<uint, Image>& getTextures() const {
         return textures;
     }
 
-    void addTexture(Image& texture) {
-        textures.push_back(texture);
+    void addTexture(uint id, Image& texture) {
+        textures[id] = texture;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Scene& scene) {
@@ -244,7 +244,7 @@ public:
         }
         os << "# Number of Textures" << std::endl;
         os << scene.getTextures().size() << std::endl;
-        
+
         return os;
     }
 };

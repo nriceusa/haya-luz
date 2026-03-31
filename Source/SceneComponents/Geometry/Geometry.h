@@ -4,6 +4,8 @@
 #include "AxisAlignedBox.h"
 #include "Material.h"
 #include "../SceneComponent.h"
+#include "../../Utilities/Vector2.h"
+#include "../../Utilities/Vector3.h"
 
 class Geometry: public SceneComponent {
 private:
@@ -44,6 +46,8 @@ public:
     }
 
     virtual const Vector3 getNormalAt(const Vector3& point) const = 0;
+
+    virtual const Vector2 getUV(const Vector3& point) const = 0;
 
     virtual void print(std::ostream& os) const override = 0;
 };
