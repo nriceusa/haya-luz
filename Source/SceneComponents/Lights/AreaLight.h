@@ -1,12 +1,26 @@
 #ifndef HAYA_LUZ_AREALIGHT_H
 #define HAYA_LUZ_AREALIGHT_H
 
+#include "../Boundable.h"
 #include "Light.h"
 
-class AreaLight : public Light {
+class AreaLight : public Light, public Boundable {
 private:
     double width;
     double height;
+
+    AxisAlignedBox computeBoundingVolume() override {
+        Vector3 right = Vector3::normalize(Vector3::cross(Vector3(0, 1, 0), this->getRotation()));
+        if (right.getSquaredLength() == 0) {
+            right = Vector3::normalize(Vector3::cross(Vector3(1, 0, 0), this->getRotation()));
+        }
+        const Vector3 up = Vector3::normalize(Vector3::cross(this->getRotation(), right));
+
+        const Vector3 minCorner = this->getLocation() - (width / 2) * right - (height / 2) * up;
+        const Vector3 maxCorner = this->getLocation() + (width / 2) * right + (height / 2) * up;
+        
+        return AxisAlignedBox{minCorner, maxCorner};
+    }
     
     const Vector3 samplePoint() const {
         const Vector3 right = Vector3::normalize(Vector3::cross(Vector3(0, 1, 0), this->getRotation()));
@@ -22,12 +36,13 @@ private:
     }
 
 public:
-    AreaLight() : width(1), height(1) {}
+    AreaLight() : width(1), height(1), Boundable() {}
 
     AreaLight(const double intensityScalar, const Vector3& intensity,
               const Vector3& location, const Vector3& rotation,
               const double width, const double height) :
-        Light(intensityScalar, intensity, location, rotation), width(width), height(height) {}
+        Light(intensityScalar, intensity, location, rotation), width(width), height(height),
+        Boundable() {}
 
     double getWidth() const {
         return width;

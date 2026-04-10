@@ -108,8 +108,7 @@ public:
                 const uint yRes = readUint(lineStream);
                 const std::string path = readString(lineStream);
 
-                Image texture(xRes, yRes, path);
-                scene.addTexture(texId, texture);
+                scene.addTexture(texId, Image(xRes, yRes, path));
 
             } else if (type == "MATERIAL") {
                 const uint matId = readUint(lineStream);
@@ -127,18 +126,22 @@ public:
                 const uint texId = readUint(lineStream);
 
                 if (texId == 0) {
-                    Material material(
-                        diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
-                        specular, specularRoughness, emissivity, transmission, refractionIndex
+                    scene.addMaterial(
+                        matId,
+                        Material(
+                            diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
+                            specular, specularRoughness, emissivity, transmission, refractionIndex
+                        )
                     );
-                    scene.addMaterial(matId, material);
                 } else {
-                    Material material(
-                        diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
-                        specular, specularRoughness, emissivity, transmission, refractionIndex,
-                        &scene.getTexture(texId)
+                    scene.addMaterial(
+                        matId,
+                        Material(
+                            diffuseIntensity, specularIntensity, emissionIntensity, diffuse,
+                            specular, specularRoughness, emissivity, transmission, refractionIndex,
+                            &scene.getTexture(texId)
+                        )
                     );
-                    scene.addMaterial(matId, material);
                 }
 
             } else if (type == "SPHERE") {
@@ -146,8 +149,7 @@ public:
                 const Vector3 center = readVector3(lineStream);
                 const double radius = readDouble(lineStream);
 
-                Sphere sphere(scene.getMaterial(matId), center, radius);
-                scene.addGeometry(sphere);
+                scene.addGeometry(Sphere(scene.getMaterial(matId), center, radius));
                 
             } else if (type == "TRIANGLE") {
                 const uint matId = readUint(lineStream);
@@ -155,8 +157,7 @@ public:
                 Vector3 point2 = readVector3(lineStream);
                 Vector3 point3 = readVector3(lineStream);
 
-                Triangle triangle(scene.getMaterial(matId), point1, point2, point3);
-                scene.addGeometry(triangle);
+                scene.addGeometry(Triangle(scene.getMaterial(matId), point1, point2, point3));
 
             } else if (type == "POLYGON") {
                 const uint matId = readUint(lineStream);
@@ -171,8 +172,7 @@ public:
                     uvs.push_back(readVector2(lineStream));
                 }
 
-                Polygon polygon(scene.getMaterial(matId), points, uvs);
-                scene.addGeometry(polygon);
+                scene.addGeometry(Polygon(scene.getMaterial(matId), points, uvs));
                 
             } else {
                 std::cerr << "Error: Unknown type from input file: " << type << std::endl;

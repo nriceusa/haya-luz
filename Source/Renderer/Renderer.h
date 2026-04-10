@@ -7,7 +7,7 @@
 #include "Ray.h"
 #include "../Scene.h"
 
-class RayTracer {
+class Renderer {
 private:
     const uint numGlossyBounces;
     const uint numPixelSamples;
@@ -15,23 +15,27 @@ private:
     const double maxClippingDistance;
 
 public:
-    RayTracer() :
-        numGlossyBounces(4),
-        numPixelSamples(1),
-        minClippingDistance(MIN_CLIPPING_DISTANCE),
-        maxClippingDistance(std::numeric_limits<double>::max()) {}
+    Renderer() : Renderer(3, 4) {}
 
-    RayTracer(const uint numGlossyBounces, const uint numPixelSamples) :
-        numGlossyBounces(numGlossyBounces),
-        numPixelSamples(numPixelSamples),
-        minClippingDistance(MIN_CLIPPING_DISTANCE),
-        maxClippingDistance(std::numeric_limits<double>::max()) {}
+    Renderer(const uint numGlossyBounces, const uint numPixelSamples) :
+        Renderer(
+            numGlossyBounces,
+            numPixelSamples,
+            MIN_CLIPPING_DISTANCE,
+            std::numeric_limits<double>::max()
+        ) {}
 
-    RayTracer(const uint numGlossyBounces, const uint numPixelSamples, double minClippingDistance, double maxClippingDistance) :
+    Renderer(
+        const uint numGlossyBounces,
+        const uint numPixelSamples,
+        double minClippingDistance,
+        double maxClippingDistance
+    ) :
         numGlossyBounces(numGlossyBounces),
         numPixelSamples(numPixelSamples),
         minClippingDistance(std::max(minClippingDistance, MIN_CLIPPING_DISTANCE)),
         maxClippingDistance(maxClippingDistance) {}
+    
 
     void render(Scene& scene, Image& image) const {
         const Camera& camera = scene.getActiveCamera();
@@ -55,12 +59,17 @@ public:
                         Vector3 jitteredRay = Vector3::jitter(rayVector, sampleWidth / 2);
 
                         const Ray ray(camera.getOrigin(), jitteredRay, scene, minClippingDistance, maxClippingDistance);
-                        pixelColor += ray.trace(numGlossyBounces);
+
+                        Vector3 surfaceRGB = ray.trace(numGlossyBounces);
+                        pixelColor += surfaceRGB;
                     }
                     rayVector.setX(rayVector.getX() + sampleWidth);
                     rayVector.setY(rayVector.getY() + pixelWidth);
                 }
                 pixelColor /= static_cast<double>(numPixelSamples * numPixelSamples);
+                pixelColor.setR(Utilities::clamp(pixelColor.getR(), 0, 1));
+                pixelColor.setG(Utilities::clamp(pixelColor.getG(), 0, 1));
+                pixelColor.setB(Utilities::clamp(pixelColor.getB(), 0, 1));
                 image.setPixelColor(x, y, pixelColor.getR(), pixelColor.getG(), pixelColor.getB());
 
                 rayVector.setX(rayVector.getX() - pixelWidth);
