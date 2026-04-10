@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     Image image(image_width, image_height);
 
     const uint numGlossyBounces = 3;
-    const uint numPixelSamples = 8;
+    const uint numPixelSamples = 50;
     Renderer renderer(numGlossyBounces, numPixelSamples);
     renderer.render(scene, image);
 

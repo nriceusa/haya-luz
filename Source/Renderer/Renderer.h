@@ -3,6 +3,8 @@
 
 #define MIN_CLIPPING_DISTANCE 0.001
 
+#include <iostream>
+
 #include "../Image/Image.h"
 #include "Ray.h"
 #include "../Scene.h"
@@ -50,7 +52,25 @@ public:
 
         rayVector.setX(initialX);
         rayVector.setY(initialY);
+
+        const uint progressBarSpace = 50;
+
         for (uint x = 0; x < image.getWidth(); ++x) {
+            const double progress = static_cast<double>(x) / static_cast<double>(image.getWidth());
+            const uint progressBarWidth = static_cast<uint>(progressBarSpace * progress);
+            std::cout << "[";
+            for (uint i = 0; i < progressBarSpace; ++i) {
+                if (i < progressBarWidth) {
+                    std::cout << "=";
+                } else if (i == progressBarWidth) {
+                    std::cout << ">";
+                } else {
+                    std::cout << " ";
+                }
+            }
+            std::cout << "] " << uint(progress * 100.0) << " %\r";
+            std::cout.flush();
+
             for (uint y = 0; y < image.getHeight(); ++y) {
                 Vector3 pixelColor(0, 0, 0);
                 for (uint sampleX = 0; sampleX < numPixelSamples; ++sampleX) {
@@ -78,6 +98,12 @@ public:
             rayVector.setX(rayVector.getX() + pixelWidth);
             rayVector.setY(initialY);
         }
+
+        std::cout << "[";
+        for (uint i = 0; i < progressBarSpace; ++i) {
+            std::cout << "=";
+        }
+        std::cout << "] 100 %" << std::endl;
     }
 };
 
