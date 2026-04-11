@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
     const uint image_height = 128 * 2;
     Image image(image_width, image_height);
 
-    const uint numGlossyBounces = 3;
-    const uint numPixelSamples = 50;
+    const uint numGlossyBounces = 100;
+    const uint numPixelSamples = 20;
     Renderer renderer(numGlossyBounces, numPixelSamples);
     renderer.render(scene, image);
 

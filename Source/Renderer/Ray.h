@@ -300,7 +300,7 @@ public:
         const double diffuseProb = material.getDiffuse() / matComponentsSum;
         const double specularProb = material.getSpecular() / matComponentsSum;
         
-        static std::mt19937 generator;
+        thread_local std::mt19937 generator;
         std::uniform_real_distribution<double> distribution(0, 1);
         const double randomValue = distribution(generator);
         if (randomValue < diffuseProb) {

@@ -26,9 +26,9 @@ private:
         const Vector3 right = Vector3::normalize(Vector3::cross(Vector3(0, 1, 0), this->getRotation()));
         const Vector3 up = Vector3::normalize(Vector3::cross(this->getRotation(), right));
         
-        static std::mt19937 generator;
-        static std::uniform_real_distribution<double> xDistribution(-width / 2, width / 2);
-        static std::uniform_real_distribution<double> yDistribution(-height / 2, height / 2);
+        thread_local std::mt19937 generator;
+        thread_local std::uniform_real_distribution<double> xDistribution(-width / 2, width / 2);
+        thread_local std::uniform_real_distribution<double> yDistribution(-height / 2, height / 2);
         const double xOffset = xDistribution(generator);
         const double yOffset = yDistribution(generator);
 
