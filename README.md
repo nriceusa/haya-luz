@@ -11,10 +11,10 @@ DIRECTIONAL_LIGHT   Dx Dy Dz    R G B   Scale
 POINT_LIGHT         X Y Z       R G B   Scale
 AREA_LIGHT          X Y Z   Dx Dy Dz    W H     R G B   Scale
 TEXTURE             TexID   Xres Yres   Path
-MATERIAL num KdR KdG KdB KsR KsG KsB KeR KeG KeB Kd Kt Kg Ke
-SPHERE mat_num X Y Z R
-TRIANGLE mat_num X Y Z X Y Z X Y Z
-POLYGON mat_num num_verts X Y Z ... X Y Z 
+MATERIAL            MatID   KdR KdG KdB KsR KsG KsB KeR KeG KeB Diffuse Specular Roughness Emissivity Transmission IOR TexID
+SPHERE              MatID   X Y Z R
+TRIANGLE            MatID   X Y Z X Y Z X Y Z
+POLYGON             MatID   num_verts   X Y Z ... X Y Z     U V ... U V
 ```
 
 Example Render:\
