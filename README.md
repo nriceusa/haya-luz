@@ -16,3 +16,6 @@ SPHERE mat_num X Y Z R
 TRIANGLE mat_num X Y Z X Y Z X Y Z
 POLYGON mat_num num_verts X Y Z ... X Y Z 
 ```
+
+Example Render:\
+![Render of example scene](example.png)
