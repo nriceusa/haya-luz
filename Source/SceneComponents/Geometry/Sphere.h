@@ -25,10 +25,14 @@ private:
     }
 
 public:
-    Sphere(Material& material, const Vector3& center) :
+    Sphere(const Vector3& center) : Sphere(Material(), center) {}
+
+    Sphere(const Vector3& center, double radius) : Sphere(Material(), center, radius) {}
+
+    Sphere(const Material& material, const Vector3& center) :
         Sphere(material, center, 1) {}
 
-    Sphere(Material& material, const Vector3& center, double radius) :
+    Sphere(const Material& material, const Vector3& center, double radius) :
         Geometry(material, center), radius(radius),
         upAxis(Vector3(0, 1, 0)), rightAxis(Vector3(1, 0, 0)) {}
 

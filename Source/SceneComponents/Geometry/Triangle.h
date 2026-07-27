@@ -37,7 +37,8 @@ public:
         const Material& material,
         const Vector3& point1,
         const Vector3& point2,
-        const Vector3& point3) :
+        const Vector3& point3
+    ) :
         Triangle(
             material,
             point1, point2, point3,

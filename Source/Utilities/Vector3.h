@@ -163,6 +163,58 @@ public:
                        vector.getZ() + distribution(generator)};
     }
 
+    static Vector3 sampleHemisphere(const Vector3& normal) {
+        static std::mt19937 generator;
+        static std::uniform_real_distribution<double> distribution(0, 1);
+        const double random1 = distribution(generator);
+        const double random2 = distribution(generator);
+
+        const double radius = sqrt(random1);
+        const double polarAngle = 2 * M_PI * random2;
+
+        const Vector3 projection(
+            radius * cos(polarAngle),
+            radius * sin(polarAngle),
+            sqrt(1 - random1)
+        );
+        
+        Vector3 tangent;
+        Vector3 bitangent;
+        if (normal.getZ() < 0) {
+            const double a = 1 / (1 - normal.getZ());
+            const double b = normal.getX() * normal.getY() * a;
+            tangent = Vector3(
+                1 + normal.getX() * normal.getX() * a,
+                -b,
+                normal.getX()
+            );
+            bitangent = Vector3(
+                b,
+                normal.getY() * normal.getY() * a - 1,
+                -normal.getY()
+            );
+        } else {
+            const double a = 1 / (1 + normal.getZ());
+            const double b = normal.getX() * normal.getY() * a;
+            tangent = Vector3(
+                1 - normal.getX() * normal.getX() * a,
+                -b,
+                -normal.getX()
+            );
+            bitangent = Vector3(
+                -b,
+                1 - normal.getY() * normal.getY() * a,
+                -normal.getY()
+            );
+        }
+
+        return (
+            projection.getX() * tangent +
+            projection.getY() * bitangent +
+            projection.getZ() * normal
+        );
+    }
+
     static Vector3 normalize(const Vector3& vector) {
         return vector / vector.getLength();
     }

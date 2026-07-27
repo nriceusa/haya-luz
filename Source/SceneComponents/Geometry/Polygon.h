@@ -27,7 +27,10 @@ private:
     }
 
 public:
-    Polygon(Material& material, std::vector<Vector3>& points, std::vector<Vector2>& uvs) :
+    Polygon(std::vector<Vector3>& points) : 
+        Polygon(Material(), points, std::vector<Vector2>(points.size())) {}
+
+    Polygon(const Material& material, const std::vector<Vector3>& points, const std::vector<Vector2>& uvs) :
         points(points),
         uvs(uvs),
         Geometry(material, points[0])

@@ -1,21 +1,15 @@
 #ifndef HAYA_LUZ_GEOMETRY_H
 #define HAYA_LUZ_GEOMETRY_H
 
-#include "AxisAlignedBox.h"
+#include "../Boundable.h"
 #include "Material.h"
 #include "../SceneComponent.h"
 #include "../../Utilities/Vector2.h"
 #include "../../Utilities/Vector3.h"
 
-class Geometry: public SceneComponent {
-private:
-    bool boundingVolumeUpdated = false;
-
+class Geometry: public SceneComponent, public Boundable {
 protected:
     Material material;
-    AxisAlignedBox boundingVolume;
-
-    virtual AxisAlignedBox computeBoundingVolume() = 0;
 
     Geometry(const Material& material, const Vector3& location) :
         SceneComponent(location), material(material) {}
@@ -30,7 +24,6 @@ protected:
         const Vector3& scale) :
         SceneComponent(location, rotation, scale), material(material) {}
     
-
 public:
     const Material& getMaterial() const {
         return material;
@@ -38,14 +31,6 @@ public:
     
     void setMaterial(const Material& newMaterial) {
         material = newMaterial;
-    }
-
-    const AxisAlignedBox& getBoundingVolume() {
-        if (!boundingVolumeUpdated) {
-            boundingVolume = computeBoundingVolume();
-            boundingVolumeUpdated = true;
-        }
-        return boundingVolume;
     }
 
     virtual const Vector3 getNormalAt(const Vector3& point) const = 0;

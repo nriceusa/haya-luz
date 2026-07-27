@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "Image/Image.h"
-#include "Renderer/RayTracer.h"
+#include "Renderer/Renderer.h"
 #include "Scene.h"
 #include "Utilities/FileManager.h"
 
@@ -29,8 +29,10 @@ int main(int argc, char* argv[]) {
     const uint image_height = 128 * 2;
     Image image(image_width, image_height);
 
-    RayTracer rayTracer(3, 4);
-    rayTracer.render(scene, image);
+    const uint numGlossyBounces = 100;
+    const uint numPixelSamples = 20;
+    Renderer renderer(numGlossyBounces, numPixelSamples);
+    renderer.render(scene, image);
 
     FileManager::saveImageAsPPM(image, outputFile);
 

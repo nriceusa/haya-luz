@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "SceneComponents/Camera.h"
-#include "SceneComponents/Geometry/AxisAlignedBox.h"
+#include "SceneComponents/AxisAlignedBox.h"
 #include "SceneComponents/Geometry/Geometry.h"
 #include "SceneComponents/Geometry/Material.h"
 #include "SceneComponents/Geometry/Polygon.h"
@@ -20,29 +20,30 @@
 class Scene {
 private:
     void initializeBoundingVolume(const uint volumeSubdivLimit, const uint volumeContentsLimit) {
-        if (geometries.empty()) {
+        if (boundables.empty()) {
             boundingVolume = AxisAlignedBox();
         } else {
-            double minX = geometries[0]->getBoundingVolume().getMinX();
-            double minY = geometries[0]->getBoundingVolume().getMinY();
-            double minZ = geometries[0]->getBoundingVolume().getMinZ();
-            double maxX = geometries[0]->getBoundingVolume().getMaxX();
-            double maxY = geometries[0]->getBoundingVolume().getMaxY();
-            double maxZ = geometries[0]->getBoundingVolume().getMaxZ();
-            for (Geometry* geometry : geometries) {
-                const AxisAlignedBox& geometryBoundingVolume = geometry->getBoundingVolume();
-                minX = std::min(minX, geometryBoundingVolume.getMinX());
-                minY = std::min(minY, geometryBoundingVolume.getMinY());
-                minZ = std::min(minZ, geometryBoundingVolume.getMinZ());
-                maxX = std::max(maxX, geometryBoundingVolume.getMaxX());
-                maxY = std::max(maxY, geometryBoundingVolume.getMaxY());
-                maxZ = std::max(maxZ, geometryBoundingVolume.getMaxZ());
+            double minX = boundables[0]->getBoundingVolume().getMinX();
+            double minY = boundables[0]->getBoundingVolume().getMinY();
+            double minZ = boundables[0]->getBoundingVolume().getMinZ();
+            double maxX = boundables[0]->getBoundingVolume().getMaxX();
+            double maxY = boundables[0]->getBoundingVolume().getMaxY();
+            double maxZ = boundables[0]->getBoundingVolume().getMaxZ();
+            for (Boundable* boundable : boundables) {
+                const AxisAlignedBox& boundableVolume = boundable->getBoundingVolume();
+                minX = std::min(minX, boundableVolume.getMinX());
+                minY = std::min(minY, boundableVolume.getMinY());
+                minZ = std::min(minZ, boundableVolume.getMinZ());
+                maxX = std::max(maxX, boundableVolume.getMaxX());
+                maxY = std::max(maxY, boundableVolume.getMaxY());
+                maxZ = std::max(maxZ, boundableVolume.getMaxZ());
             }
-            boundingVolume = AxisAlignedBox(Vector3(minX, minY, minZ), Vector3(maxX, maxY, maxZ), geometries);
+            boundingVolume = AxisAlignedBox(Vector3(minX, minY, minZ), Vector3(maxX, maxY, maxZ), boundables);
             boundingVolume.recursiveSubdivide(volumeSubdivLimit, volumeContentsLimit);
         }
     }
 
+    std::deque<Boundable*> boundables;
     AxisAlignedBox boundingVolume;
     bool boundingVolumeUpdated = false;
     const uint volumeSubdivLimit;
@@ -53,7 +54,7 @@ private:
     Camera* activeCamera;
     std::deque<Camera> cameras;
 
-    std::deque<const Light*> lights;
+    std::deque<Light*> lights;
     std::deque<AreaLight> areaLights;
     std::deque<DirectionalLight> directionalLights;
     std::deque<PointLight> pointLights;
@@ -141,7 +142,7 @@ public:
         return cameras[index];
     }
 
-    void addCamera(const Camera& camera) {
+    void addCamera(Camera&& camera) {
         cameras.push_back(camera);
 
         if (cameras.size() == 1) {
@@ -159,20 +160,24 @@ public:
         }
     }
 
-    void addLight(const Light& light) {
-        if (const DirectionalLight* directionalLight = dynamic_cast<const DirectionalLight*>(&light)) {
-            directionalLights.push_back(*directionalLight);
-            lights.push_back(&directionalLights.back());
-        } else if (const PointLight* pointLight = dynamic_cast<const PointLight*>(&light)) {
-            pointLights.push_back(*pointLight);
-            lights.push_back(&pointLights.back());
-        } else if (const AreaLight* areaLight = dynamic_cast<const AreaLight*>(&light)) {
-            areaLights.push_back(*areaLight);
-            lights.push_back(&areaLights.back());
-        }
+    void addLight(DirectionalLight&& light) {
+        directionalLights.push_back(std::move(light));
+        lights.push_back(&directionalLights.back());
     }
 
-    const std::deque<const Light*>& getLights() const {
+    void addLight(PointLight&& light) {
+        pointLights.push_back(std::move(light));
+        lights.push_back(&pointLights.back());
+        boundables.push_back(&pointLights.back());
+    }
+
+    void addLight(AreaLight&& light) {
+        areaLights.push_back(std::move(light));
+        lights.push_back(&areaLights.back());
+        boundables.push_back(&areaLights.back());
+    }
+
+    const std::deque<Light*>& getLights() const {
         return lights;
     }
 
@@ -184,17 +189,22 @@ public:
         return pointLights;
     }
 
-    void addGeometry(Geometry& geometry) {
-        if (Polygon* polygon = dynamic_cast<Polygon*>(&geometry)) {
-            polygons.push_back(std::move(*polygon));
-            geometries.push_back(&polygons.back());
-        } else if (Sphere* sphere = dynamic_cast<Sphere*>(&geometry)) {
-            spheres.push_back(std::move(*sphere));
-            geometries.push_back(&spheres.back());
-        } else if (Triangle* triangle = dynamic_cast<Triangle*>(&geometry)) {
-            triangles.push_back(std::move(*triangle));
-            geometries.push_back(&triangles.back());
-        }
+    void addGeometry(Polygon&& geometry) {
+        polygons.push_back(std::move(geometry));
+        geometries.push_back(&polygons.back());
+        boundables.push_back(&polygons.back());
+    }
+
+    void addGeometry(Sphere&& geometry) {
+        spheres.push_back(std::move(geometry));
+        geometries.push_back(&spheres.back());
+        boundables.push_back(&spheres.back());
+    }
+
+    void addGeometry(Triangle&& geometry) {
+        triangles.push_back(std::move(geometry));
+        geometries.push_back(&triangles.back());
+        boundables.push_back(&triangles.back());
     }
 
     const std::deque<Geometry*>& getGeometries() const {
@@ -209,7 +219,7 @@ public:
         return materials;
     }
 
-    void addMaterial(uint id, Material& material) {
+    void addMaterial(uint id, Material&& material) {
         materials[id] = material;
     }
 
@@ -221,7 +231,7 @@ public:
         return textures;
     }
 
-    void addTexture(uint id, Image& texture) {
+    void addTexture(uint id, Image&& texture) {
         textures[id] = texture;
     }
 

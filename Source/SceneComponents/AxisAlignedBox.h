@@ -3,15 +3,15 @@
 
 #include <memory>
 
-#include "../../Utilities/Vector3.h"
+#include "../Utilities/Vector3.h"
 
-class Geometry;
+class Boundable;
 
 class AxisAlignedBox {
 private:
     Vector3 minCorner;
     Vector3 maxCorner;
-    std::deque<Geometry*> contents;
+    std::deque<Boundable*> contents;
     std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>> children{nullptr, nullptr};
 
     std::pair<std::unique_ptr<AxisAlignedBox>, std::unique_ptr<AxisAlignedBox>> split() const;
@@ -22,12 +22,12 @@ public:
     AxisAlignedBox(const Vector3& minCorner, const Vector3& maxCorner) :
         minCorner(minCorner), maxCorner(maxCorner) {}
 
-    AxisAlignedBox(const Vector3& minCorner, const Vector3& maxCorner, const std::deque<Geometry*>& contents) :
+    AxisAlignedBox(const Vector3& minCorner, const Vector3& maxCorner, const std::deque<Boundable*>& contents) :
         minCorner(minCorner), maxCorner(maxCorner), contents(contents) {}
 
     void recursiveSubdivide(uint subdivLimit, const uint contentsLimit);
 
-    const std::deque<Geometry*>& getContents() const {
+    const std::deque<Boundable*>& getContents() const {
         return contents;
     }
 
